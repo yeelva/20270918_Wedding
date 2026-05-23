@@ -728,7 +728,7 @@
     body { cursor: none; }
     a, button, .photo-tile, .lb-arrow, #lightbox-close, .reg-link,
     .btn-submit, nav a, .toggle-opt label, .sched-item { cursor: none; }
-    input, textarea, select { cursor: text; }
+    input, textarea, select { cursor: text !important; }
 
     #custom-cursor {
       position: fixed;
@@ -1184,10 +1184,10 @@
     document.getElementById('rsvp-success').style.display = 'block';
   }
 
-  // Custom neon cursor
-  (function () {
+  // Custom neon cursor — wait for DOM so element exists
+  document.addEventListener('DOMContentLoaded', function () {
     const cursor = document.getElementById('custom-cursor');
-    if (!cursor || window.matchMedia('(hover: none)').matches) return; // skip touch devices
+    if (!cursor || window.matchMedia('(hover: none)').matches) return;
     document.addEventListener('mousemove', e => {
       cursor.style.left = e.clientX + 'px';
       cursor.style.top = e.clientY + 'px';
@@ -1199,7 +1199,7 @@
       const clickable = e.target.closest('a, button, .photo-tile, .lb-arrow, #lightbox-close, .reg-link, .btn-submit, .toggle-opt, .sched-item, nav a');
       cursor.classList.toggle('is-pointer', !!clickable);
     });
-  })();
+  });
 
   // Lightbox navigation & close — runs after DOM is ready
   document.addEventListener('DOMContentLoaded', function () {
