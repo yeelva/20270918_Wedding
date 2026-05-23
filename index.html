@@ -724,6 +724,30 @@
     }
     #lightbox-close:hover { background: rgba(255,255,255,0.22); }
 
+    .lb-arrow {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.12);
+      border-radius: 50%;
+      cursor: pointer;
+      color: #fff;
+      font-size: 1.5rem;
+      line-height: 1;
+      transition: background 0.15s;
+      user-select: none;
+      z-index: 1001;
+    }
+    .lb-arrow:hover { background: rgba(255,255,255,0.25); }
+    #lb-prev { left: 20px; }
+    #lb-next { right: 20px; }
+    #lightbox-close { z-index: 1001; }
+
   </style>
 </head>
 <body>
@@ -1091,14 +1115,23 @@
       carousel.scrollLeft = touchStartScroll - (e.touches[0].pageX - touchStartX);
     }, { passive: true });
 
-    // Lightbox click — reuse mouseDownX from above
-    tiles.forEach(tile => {
+    // Lightbox open — track index for navigation
+    let lbIndex = 0;
+
+    function openLightbox(index) {
+      lbIndex = (index + tiles.length) % tiles.length;
+      window._lbCurrentIndex = lbIndex;
+      document.getElementById('lightbox-img').src = tiles[lbIndex].querySelector('img').src;
+      document.getElementById('lightbox').classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    window._lbOpen = openLightbox;
+
+    tiles.forEach((tile, i) => {
       tile.addEventListener('click', e => {
         if (Math.abs(e.clientX - mouseDownX) > 6) return;
-        const lb = document.getElementById('lightbox');
-        document.getElementById('lightbox-img').src = tile.querySelector('img').src;
-        lb.classList.add('is-open');
-        document.body.style.overflow = 'hidden';
+        openLightbox(i);
       });
     });
   })();
@@ -1109,24 +1142,47 @@
     document.getElementById('rsvp-success').style.display = 'block';
   }
 
-  // Lightbox close handlers
-  (function () {
+  // Lightbox navigation & close — runs after DOM is ready
+  document.addEventListener('DOMContentLoaded', function () {
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
     const lbClose = document.getElementById('lightbox-close');
+    const lbPrev = document.getElementById('lb-prev');
+    const lbNext = document.getElementById('lb-next');
+
     function closeLightbox() {
       lb.classList.remove('is-open');
       document.body.style.overflow = '';
       lbImg.src = '';
     }
+
     lbClose.addEventListener('click', closeLightbox);
+    lbPrev.addEventListener('click', e => { e.stopPropagation(); if (window._lbOpen) window._lbOpen(window._lbCurrentIndex - 1); });
+    lbNext.addEventListener('click', e => { e.stopPropagation(); if (window._lbOpen) window._lbOpen(window._lbCurrentIndex + 1); });
     lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-  })();
+
+    document.addEventListener('keydown', e => {
+      if (!lb.classList.contains('is-open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') { e.preventDefault(); if (window._lbOpen) window._lbOpen(window._lbCurrentIndex - 1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); if (window._lbOpen) window._lbOpen(window._lbCurrentIndex + 1); }
+    });
+
+    // Swipe support
+    let swipeStartX = 0;
+    lb.addEventListener('touchstart', e => { swipeStartX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - swipeStartX;
+      if (Math.abs(dx) < 40) return;
+      if (window._lbOpen) window._lbOpen(window._lbCurrentIndex + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+  });
 </script>
 
 <div id="lightbox">
   <div id="lightbox-close">&#x2715;</div>
+  <div class="lb-arrow" id="lb-prev">&#x2039;</div>
+  <div class="lb-arrow" id="lb-next">&#x203A;</div>
   <img id="lightbox-img" src="" alt="" />
 </div>
 
