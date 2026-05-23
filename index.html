@@ -673,6 +673,53 @@
       .photo-tile { height: 280px; }
     }
 
+    /* ── LIGHTBOX ── */
+    .photo-tile { cursor: pointer; }
+
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(20, 18, 14, 0.88);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+    }
+    #lightbox.is-open {
+      display: flex;
+    }
+    #lightbox img {
+      max-width: min(90vw, 1200px);
+      max-height: 88vh;
+      width: auto;
+      height: auto;
+      display: block;
+      border-radius: 2px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+      transition: opacity 0.2s ease;
+    }
+    #lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.12);
+      border-radius: 50%;
+      cursor: pointer;
+      color: #fff;
+      font-size: 1.4rem;
+      line-height: 1;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    #lightbox-close:hover { background: rgba(255,255,255,0.22); }
+
   </style>
 </head>
 <body>
@@ -1038,6 +1085,43 @@
     document.getElementById('rsvp-form').style.display = 'none';
     document.getElementById('rsvp-success').style.display = 'block';
   }
+
+  // Lightbox
+  (function () {
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    const lbClose = document.getElementById('lightbox-close');
+
+    let mouseDownX = 0;
+
+    document.querySelector('.photos-carousel').addEventListener('mousedown', e => { mouseDownX = e.clientX; });
+
+    document.querySelectorAll('.photo-tile').forEach(tile => {
+      tile.addEventListener('click', e => {
+        if (Math.abs(e.clientX - mouseDownX) > 6) return;
+        const src = tile.querySelector('img').src;
+        lbImg.src = src;
+        lb.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
+    function closeLightbox() {
+      lb.classList.remove('is-open');
+      document.body.style.overflow = '';
+      lbImg.src = '';
+    }
+
+    lbClose.addEventListener('click', closeLightbox);
+    lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  })();
 </script>
+
+<div id="lightbox">
+  <div id="lightbox-close">&#x2715;</div>
+  <img id="lightbox-img" src="" alt="" />
+</div>
+
 </body>
 </html>
