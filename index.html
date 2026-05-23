@@ -724,6 +724,36 @@
     }
     #lightbox-close:hover { background: rgba(255,255,255,0.22); }
 
+    /* ── CUSTOM CURSOR ── */
+    body { cursor: none; }
+    a, button, .photo-tile, .lb-arrow, #lightbox-close, .reg-link,
+    .btn-submit, nav a, .toggle-opt label, .sched-item { cursor: none; }
+    input, textarea, select { cursor: text; }
+
+    #custom-cursor {
+      position: fixed;
+      pointer-events: none;
+      z-index: 999999;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--neon);
+      box-shadow:
+        0 0 4px var(--neon),
+        0 0 10px rgba(255,110,86,0.8),
+        0 0 22px rgba(255,110,86,0.5),
+        0 0 44px rgba(232,85,64,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.15s ease, height 0.15s ease, opacity 0.2s ease;
+      opacity: 0;
+      top: -20px; left: -20px;
+    }
+    #custom-cursor.is-pointer {
+      width: 16px;
+      height: 16px;
+    }
+    #custom-cursor.is-visible { opacity: 1; }
+
     .lb-arrow {
       position: fixed;
       top: 50%;
@@ -999,7 +1029,7 @@
       <p>We'll be in touch closer to the date with more details.</p>
     </div>
 
-    <p class="rsvp-deadline"><strong style="color:#8b1a1a;">Please RSVP by July 1, 2027.</strong></p>
+    <p class="rsvp-deadline">Please RSVP by <strong style="color:#8b1a1a;">July 1, 2027.</strong></p>
   </div>
 </section>
 
@@ -1085,7 +1115,19 @@
 
     carousel.addEventListener('scroll', scheduleUpdate, { passive: true });
     window.addEventListener('resize', scheduleUpdate);
-    setTimeout(updateCenter, 100);
+    // Scroll to center first photo once layout is stable
+    function initCenter() {
+      const first = tiles[0];
+      if (first && carousel.offsetWidth > 0) {
+        carousel.scrollLeft = first.offsetLeft + first.offsetWidth / 2 - carousel.offsetWidth / 2;
+      }
+      updateCenter();
+    }
+    if (document.readyState === 'complete') {
+      initCenter();
+    } else {
+      window.addEventListener('load', initCenter);
+    }
 
     // Drag to scroll
     let down = false, startX, startScroll;
@@ -1142,6 +1184,23 @@
     document.getElementById('rsvp-success').style.display = 'block';
   }
 
+  // Custom neon cursor
+  (function () {
+    const cursor = document.getElementById('custom-cursor');
+    if (!cursor || window.matchMedia('(hover: none)').matches) return; // skip touch devices
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      cursor.classList.add('is-visible');
+    });
+    document.addEventListener('mouseleave', () => cursor.classList.remove('is-visible'));
+    document.addEventListener('mouseenter', () => cursor.classList.add('is-visible'));
+    document.addEventListener('mouseover', e => {
+      const clickable = e.target.closest('a, button, .photo-tile, .lb-arrow, #lightbox-close, .reg-link, .btn-submit, .toggle-opt, .sched-item, nav a');
+      cursor.classList.toggle('is-pointer', !!clickable);
+    });
+  })();
+
   // Lightbox navigation & close — runs after DOM is ready
   document.addEventListener('DOMContentLoaded', function () {
     const lb = document.getElementById('lightbox');
@@ -1178,6 +1237,8 @@
     }, { passive: true });
   });
 </script>
+
+<div id="custom-cursor"></div>
 
 <div id="lightbox">
   <div id="lightbox-close">&#x2715;</div>
