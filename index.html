@@ -82,13 +82,28 @@
     nav a:hover { color: var(--terra); }
 
     /* ── HERO ── */
+    #hero::before {
+      content: '囍';
+      font-family: 'Noto Sans SC', 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      font-weight: 900;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: min(52vw, 480px);
+      line-height: 1;
+      color: rgba(255,110,86,0.07);
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+
     #hero {
-      min-height: calc(100vh - 56px);
       background-color: var(--sign-bg);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 60px 40px;
+      padding: 52px 40px;
       position: relative;
       overflow: hidden;
     }
@@ -597,7 +612,7 @@
 
     /* ── PHOTOS CAROUSEL ── */
     #photos {
-      background: var(--sign-bg);
+      background: var(--sage-pale);
       padding-bottom: 0;
     }
     #photos .section-wrap {
@@ -685,45 +700,6 @@
     <h1 class="neon-title">Elva & Ian's Wedding</h1>
     <div class="neon-rule"></div>
     <p class="neon-date">September 18, 2027</p>
-  </div>
-</section>
-
-<!-- PHOTOS -->
-<section id="photos">
-  <div class="photos-title-wrap" style="padding: 40px 120px 0;">
-    <h2 style="font-family:'Playfair Display',serif; font-size:1.1rem; color:rgba(244,237,226,0.55); letter-spacing:0.14em; font-weight:400;">Some photos of us over the years</h2>
-  </div>
-  <div class="photos-carousel-wrap">
-    <div class="photos-carousel">
-      <div class="photo-tile"><img src="images/engagement.jpg"       alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/film-hug.jpg"         alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/jump-skyline.jpg"     alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/rocky-sunset.jpg"     alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/restaurant-date.jpg"  alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/central-park.jpg"     alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/alpine-hike.jpg"      alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/mirror-selfie.jpg"    alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/forest-bench.jpg"     alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/cocktail-home.jpg"    alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/snorkel.jpg"          alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/fall-hike.jpg"        alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/champ-flex.jpg"       alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/cabo-marina.jpg"      alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/hotel-pup.jpg"        alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/couch-home.jpg"       alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/snow-cabin.jpg"       alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/theater.jpg"          alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/stanford-hike.jpg"    alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/waterfall-winter.jpg" alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/canyon-hike.jpg"      alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/fancy-night.jpg"      alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/kayak.jpg"            alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/race-medals.jpg"      alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/puppy-cafe.jpg"       alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/chef-hats.jpg"        alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/couch-bowls.jpg"      alt="" loading="lazy"></div>
-      <div class="photo-tile"><img src="images/rice-paddle.jpg"      alt="" loading="lazy"></div>
-    </div>
   </div>
 </section>
 
@@ -961,6 +937,45 @@
     </div>
 
     <p class="rsvp-deadline">Please RSVP by August 1, 2027.</p>
+  </div>
+</section>
+
+<!-- PHOTOS -->
+<section id="photos">
+  <div class="photos-title-wrap" style="padding: 40px 120px 0;">
+    <h2 style="font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--muted); letter-spacing:0.14em; font-weight:400; font-style:italic;">Some photos of us over the years in the meantime...</h2>
+  </div>
+  <div class="photos-carousel-wrap">
+    <div class="photos-carousel">
+      <div class="photo-tile"><img src="images/engagement.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/film-hug.jpg"         alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/jump-skyline.jpg"     alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/rocky-sunset.jpg"     alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/restaurant-date.jpg"  alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/central-park.jpg"     alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/alpine-hike.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/mirror-selfie.jpg"    alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/forest-bench.jpg"     alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/cocktail-home.jpg"    alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/snorkel.jpg"          alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/fall-hike.jpg"        alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/champ-flex.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/cabo-marina.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/hotel-pup.jpg"        alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/couch-home.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/snow-cabin.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/theater.jpg"          alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/stanford-hike.jpg"    alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/waterfall-winter.jpg" alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/canyon-hike.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/fancy-night.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/kayak.jpg"            alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/race-medals.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/puppy-cafe.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/chef-hats.jpg"        alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/couch-bowls.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/rice-paddle.jpg"      alt="" loading="lazy"></div>
+    </div>
   </div>
 </section>
 
