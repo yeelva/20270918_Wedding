@@ -158,6 +158,17 @@
         drop-shadow(0 0 4px var(--neon))
         drop-shadow(0 0 10px rgba(255,110,86,0.65));
     }
+    .neon-rule .emblem-hanzi {
+      font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--neon);
+      line-height: 1;
+      text-shadow:
+        0 0 5px var(--neon),
+        0 0 12px rgba(255,110,86,0.7),
+        0 0 24px rgba(232,85,64,0.4);
+    }
 
     .neon-date {
       font-size: clamp(0.8rem, 1.5vw, 1rem);
@@ -753,18 +764,8 @@
         <line x1="4" y1="9" x2="48" y2="9" stroke="var(--neon)" stroke-width="1.4" stroke-linecap="round"/>
         <circle cx="3" cy="9" r="1.8" fill="var(--neon)" opacity="0.7"/>
       </svg>
-      <!-- centre bloom (unchanged) -->
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="var(--neon)" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="11" cy="6"  rx="2.2" ry="4.5" opacity="0.9"/>
-        <ellipse cx="11" cy="16" rx="2.2" ry="4.5" opacity="0.9"/>
-        <ellipse cx="6"  cy="11" rx="4.5" ry="2.2" opacity="0.9"/>
-        <ellipse cx="16" cy="11" rx="4.5" ry="2.2" opacity="0.9"/>
-        <ellipse cx="7.5"  cy="7.5"  rx="1.6" ry="3.4" transform="rotate(-45 7.5 7.5)"   opacity="0.6"/>
-        <ellipse cx="14.5" cy="7.5"  rx="1.6" ry="3.4" transform="rotate(45 14.5 7.5)"   opacity="0.6"/>
-        <ellipse cx="7.5"  cy="14.5" rx="1.6" ry="3.4" transform="rotate(45 7.5 14.5)"   opacity="0.6"/>
-        <ellipse cx="14.5" cy="14.5" rx="1.6" ry="3.4" transform="rotate(-45 14.5 14.5)" opacity="0.6"/>
-        <circle cx="11" cy="11" r="2.2"/>
-      </svg>
+      <!-- centre 囍 -->
+      <span class="emblem-hanzi">囍</span>
       <!-- right line -->
       <svg width="48" height="18" viewBox="0 0 48 18" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
         <line x1="4" y1="9" x2="48" y2="9" stroke="var(--neon)" stroke-width="1.4" stroke-linecap="round"/>
