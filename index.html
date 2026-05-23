@@ -613,48 +613,67 @@
       .travel-grid { grid-template-columns: 1fr; }
     }
 
-    /* ── PHOTOS GALLERY ── */
-    #photos { background: var(--blush); }
-
-    #photos .section-head {
-      border-bottom-color: var(--border);
+    /* ── PHOTOS CAROUSEL ── */
+    #photos {
+      background: var(--cream);
+      padding-bottom: 0;
     }
-    #photos .section-title { color: var(--ink); }
-    #photos .section-num  { color: var(--muted); }
-
-    .photos-masonry {
-      columns: 3;
-      column-gap: 5px;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 40px 80px;
+    #photos .section-wrap {
+      padding-top: 48px;
+      padding-bottom: 24px;
     }
+
+    .photos-carousel-wrap {
+      overflow: hidden;
+      padding-bottom: 64px;
+    }
+
+    .photos-carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 18px;
+      padding: 16px 120px 32px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      cursor: grab;
+      align-items: center;
+    }
+    .photos-carousel::-webkit-scrollbar { display: none; }
+    .photos-carousel.is-dragging { cursor: grabbing; scroll-snap-type: none; }
 
     .photo-tile {
-      break-inside: avoid;
-      margin-bottom: 5px;
+      scroll-snap-align: center;
+      flex: 0 0 auto;
+      border-radius: 3px;
       overflow: hidden;
-      border-radius: 2px;
-      background: #d4bab0;
+      height: 480px;
+      transform: scale(0.78);
+      transform-origin: center center;
+      transition: transform 0.5s cubic-bezier(.22,.68,0,1.2),
+                  box-shadow 0.5s ease,
+                  opacity 0.5s ease;
+      opacity: 0.55;
     }
-
-    .photo-tile img {
-      width: 100%;
-      display: block;
-      opacity: 0.9;
-      transition: transform 0.5s ease, opacity 0.35s ease;
-    }
-
-    .photo-tile:hover img {
-      transform: scale(1.045);
+    .photo-tile.is-center {
+      transform: scale(1);
+      box-shadow: 0 28px 70px rgba(37,32,24,0.28);
       opacity: 1;
+    }
+    .photo-tile img {
+      height: 100%;
+      width: auto;
+      display: block;
+      pointer-events: none;
     }
 
     @media (max-width: 800px) {
-      .photos-masonry { columns: 2; padding: 0 20px 60px; }
+      .photos-carousel { padding: 16px 60px 32px; }
+      .photo-tile { height: 340px; }
     }
     @media (max-width: 480px) {
-      .photos-masonry { columns: 1; }
+      .photos-carousel { padding: 16px 40px 32px; gap: 12px; }
+      .photo-tile { height: 280px; }
     }
 
   </style>
@@ -669,8 +688,8 @@
     <li><a href="#travel">Travel</a></li>
     <li><a href="#registry">Registry</a></li>
     <li><a href="#qa">Q&amp;A</a></li>
-    <li><a href="#rsvp">RSVP</a></li>
     <li><a href="#photos">Photos</a></li>
+    <li><a href="#rsvp">RSVP</a></li>
   </ul>
 </nav>
 
@@ -707,6 +726,47 @@
   </div>
 </section>
 
+<!-- PHOTOS -->
+<section id="photos">
+  <div class="section-wrap">
+    <div class="section-head" style="border-bottom:none; padding-bottom:0;">
+      <h2 class="section-title" style="font-size:clamp(1rem,2vw,1.25rem); letter-spacing:.18em; text-transform:uppercase; color:var(--muted);">Some photos of us over the years</h2>
+    </div>
+  </div>
+  <div class="photos-carousel-wrap">
+    <div class="photos-carousel">
+      <div class="photo-tile"><img src="images/engagement.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/film-hug.jpg"         alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/jump-skyline.jpg"     alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/rocky-sunset.jpg"     alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/restaurant-date.jpg"  alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/central-park.jpg"     alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/alpine-hike.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/mirror-selfie.jpg"    alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/forest-bench.jpg"     alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/cocktail-home.jpg"    alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/snorkel.jpg"          alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/fall-hike.jpg"        alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/champ-flex.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/cabo-marina.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/hotel-pup.jpg"        alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/couch-home.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/snow-cabin.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/theater.jpg"          alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/stanford-hike.jpg"    alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/waterfall-winter.jpg" alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/canyon-hike.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/fancy-night.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/kayak.jpg"            alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/race-medals.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/puppy-cafe.jpg"       alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/chef-hats.jpg"        alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/couch-bowls.jpg"      alt="" loading="lazy"></div>
+      <div class="photo-tile"><img src="images/rice-paddle.jpg"      alt="" loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
 <!-- SCHEDULE -->
 <section id="schedule">
 
@@ -715,7 +775,7 @@
   <div class="section-wrap">
     <div class="section-head">
       <h2 class="section-title">The Day</h2>
-      <span class="section-num">01 / 06</span>
+      <span class="section-num">01 / 05</span>
     </div>
     <div class="sched-grid">
       <div class="sched-item">
@@ -762,7 +822,7 @@
   <div class="section-wrap">
     <div class="section-head">
       <h2 class="section-title">Getting Here</h2>
-      <span class="section-num">02 / 06</span>
+      <span class="section-num">02 / 05</span>
     </div>
     <div class="travel-grid">
       <div class="t-card featured">
@@ -800,7 +860,7 @@
   <div class="section-wrap">
     <div class="section-head">
       <h2 class="section-title">Registry</h2>
-      <span class="section-num">03 / 06</span>
+      <span class="section-num">03 / 05</span>
     </div>
     <p class="reg-intro">Your presence is the greatest gift. But if you'd like to celebrate us with something, we've put together a couple of registries — a mix of home upgrades, experiences, and a little honeymoon fund.</p>
     <div class="reg-grid">
@@ -823,7 +883,7 @@
   <div class="section-wrap">
     <div class="section-head">
       <h2 class="section-title">Good to Know</h2>
-      <span class="section-num">04 / 06</span>
+      <span class="section-num">04 / 05</span>
     </div>
     <div class="qa-list">
       <div class="qa-item">
@@ -863,7 +923,7 @@
   <div class="section-wrap">
     <div class="section-head">
       <h2 class="section-title">RSVP</h2>
-      <span class="section-num">05 / 06</span>
+      <span class="section-num">05 / 05</span>
     </div>
     <p class="rsvp-intro">We'd love to know you're coming. Fill this out and we'll take it from there — no fuss.</p>
 
@@ -926,46 +986,6 @@
   </div>
 </section>
 
-<!-- PHOTOS -->
-<section id="photos">
-  <div class="section-wrap">
-    <div class="section-head">
-      <h2 class="section-title">Some photos of us over the years</h2>
-      <span class="section-num">06 / 06</span>
-    </div>
-  </div>
-  <div class="photos-masonry">
-    <div class="photo-tile"><img src="images/engagement.jpg"      alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/film-hug.jpg"        alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/jump-skyline.jpg"    alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/rocky-sunset.jpg"    alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/restaurant-date.jpg" alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/central-park.jpg"    alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/alpine-hike.jpg"     alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/mirror-selfie.jpg"   alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/forest-bench.jpg"    alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/cocktail-home.jpg"   alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/snorkel.jpg"         alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/fall-hike.jpg"       alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/champ-flex.jpg"      alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/cabo-marina.jpg"     alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/hotel-pup.jpg"       alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/couch-home.jpg"      alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/snow-cabin.jpg"      alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/theater.jpg"         alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/stanford-hike.jpg"   alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/waterfall-winter.jpg" alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/canyon-hike.jpg"     alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/fancy-night.jpg"     alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/kayak.jpg"           alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/race-medals.jpg"     alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/puppy-cafe.jpg"      alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/chef-hats.jpg"       alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/couch-bowls.jpg"     alt="" loading="lazy"></div>
-    <div class="photo-tile"><img src="images/rice-paddle.jpg"     alt="" loading="lazy"></div>
-  </div>
-</section>
-
 <!-- FOOTER -->
 <footer>
   <div>
@@ -976,6 +996,62 @@
 </footer>
 
 <script>
+
+
+  // ── Photo carousel ──────────────────────────────────────────────────────
+  (function () {
+    const carousel = document.querySelector('.photos-carousel');
+    if (!carousel) return;
+
+    function updateCenter() {
+      const tiles = Array.from(carousel.querySelectorAll('.photo-tile'));
+      const cx = carousel.getBoundingClientRect().left + carousel.offsetWidth / 2;
+      let closest = null, minDist = Infinity;
+      tiles.forEach(t => {
+        const r = t.getBoundingClientRect();
+        const dist = Math.abs(r.left + r.width / 2 - cx);
+        if (dist < minDist) { minDist = dist; closest = t; }
+      });
+      tiles.forEach(t => t.classList.remove('is-center'));
+      if (closest) closest.classList.add('is-center');
+    }
+
+    carousel.addEventListener('scroll', updateCenter, { passive: true });
+    window.addEventListener('resize', updateCenter);
+    setTimeout(updateCenter, 150);
+
+    // Drag to scroll
+    let down = false, startX, startScroll;
+    carousel.addEventListener('mousedown', e => {
+      down = true;
+      startX = e.pageX;
+      startScroll = carousel.scrollLeft;
+      carousel.classList.add('is-dragging');
+    });
+    window.addEventListener('mouseup', () => {
+      if (!down) return;
+      down = false;
+      carousel.classList.remove('is-dragging');
+    });
+    carousel.addEventListener('mousemove', e => {
+      if (!down) return;
+      e.preventDefault();
+      carousel.scrollLeft = startScroll - (e.pageX - startX);
+      updateCenter();
+    });
+
+    // Touch support
+    let touchStartX, touchStartScroll;
+    carousel.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].pageX;
+      touchStartScroll = carousel.scrollLeft;
+    }, { passive: true });
+    carousel.addEventListener('touchmove', e => {
+      carousel.scrollLeft = touchStartScroll - (e.touches[0].pageX - touchStartX);
+      updateCenter();
+    }, { passive: true });
+  })();
+
   function submitRSVP(e) {
     e.preventDefault();
     document.getElementById('rsvp-form').style.display = 'none';
