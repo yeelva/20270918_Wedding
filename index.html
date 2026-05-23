@@ -9,7 +9,7 @@
   <style>
     :root {
       --cream:      #f4ede2;
-      --sage-pale:  #dce6da;
+      --sage-pale:  #ECF0E6;
       --sage:       #7a9878;
       --sage-mid:   #4a7048;
       --sign-bg:    #1c201e;
@@ -100,6 +100,9 @@
 
     #hero {
       background-color: var(--sign-bg);
+      background-image: linear-gradient(rgba(28,32,30,0.82), rgba(28,32,30,0.82)), url('images/venue.jpg');
+      background-size: cover;
+      background-position: center;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -321,7 +324,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1px;
-      background: rgba(122,152,120,0.3);
+      background: rgba(90,100,80,0.35);
     }
 
     .t-card {
@@ -331,7 +334,7 @@
 
     .t-card.featured {
       grid-column: 1 / -1;
-      background: #cddacb;
+      background: #DDE4D4;
     }
 
     .t-card.featured .tc-label { color: var(--terra); }
@@ -426,7 +429,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1px;
-      background: rgba(122,152,120,0.3);
+      background: rgba(90,100,80,0.35);
     }
 
     .qa-item {
