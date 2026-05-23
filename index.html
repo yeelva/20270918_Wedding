@@ -650,10 +650,11 @@
       height: 480px;
       transform: scale(0.78);
       transform-origin: center center;
-      transition: transform 0.5s cubic-bezier(.22,.68,0,1.2),
-                  box-shadow 0.5s ease,
-                  opacity 0.5s ease;
+      transition: transform 0.4s cubic-bezier(.22,.68,0,1.2),
+                  box-shadow 0.4s ease,
+                  opacity 0.4s ease;
       opacity: 0.55;
+      will-change: transform, opacity;
     }
     .photo-tile.is-center {
       transform: scale(1);
@@ -1034,41 +1035,50 @@
     const carousel = document.querySelector('.photos-carousel');
     if (!carousel) return;
 
+    const tiles = Array.from(carousel.querySelectorAll('.photo-tile'));
+    let rafPending = false;
+    let currentCenter = null;
+
     function updateCenter() {
-      const tiles = Array.from(carousel.querySelectorAll('.photo-tile'));
-      const cx = carousel.getBoundingClientRect().left + carousel.offsetWidth / 2;
+      const cx = carousel.scrollLeft + carousel.offsetWidth / 2;
       let closest = null, minDist = Infinity;
       tiles.forEach(t => {
-        const r = t.getBoundingClientRect();
-        const dist = Math.abs(r.left + r.width / 2 - cx);
+        const dist = Math.abs(t.offsetLeft + t.offsetWidth / 2 - cx);
         if (dist < minDist) { minDist = dist; closest = t; }
       });
-      tiles.forEach(t => t.classList.remove('is-center'));
-      if (closest) closest.classList.add('is-center');
+      if (closest !== currentCenter) {
+        if (currentCenter) currentCenter.classList.remove('is-center');
+        if (closest) closest.classList.add('is-center');
+        currentCenter = closest;
+      }
     }
 
-    carousel.addEventListener('scroll', updateCenter, { passive: true });
-    window.addEventListener('resize', updateCenter);
-    setTimeout(updateCenter, 150);
+    function scheduleUpdate() {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => { rafPending = false; updateCenter(); });
+    }
+
+    carousel.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate);
+    setTimeout(updateCenter, 100);
 
     // Drag to scroll
     let down = false, startX, startScroll;
+    let mouseDownX = 0;
     carousel.addEventListener('mousedown', e => {
-      down = true;
-      startX = e.pageX;
-      startScroll = carousel.scrollLeft;
+      down = true; mouseDownX = e.clientX;
+      startX = e.pageX; startScroll = carousel.scrollLeft;
       carousel.classList.add('is-dragging');
     });
     window.addEventListener('mouseup', () => {
-      if (!down) return;
-      down = false;
+      if (!down) return; down = false;
       carousel.classList.remove('is-dragging');
     });
     carousel.addEventListener('mousemove', e => {
       if (!down) return;
       e.preventDefault();
       carousel.scrollLeft = startScroll - (e.pageX - startX);
-      updateCenter();
     });
 
     // Touch support
@@ -1079,8 +1089,18 @@
     }, { passive: true });
     carousel.addEventListener('touchmove', e => {
       carousel.scrollLeft = touchStartScroll - (e.touches[0].pageX - touchStartX);
-      updateCenter();
     }, { passive: true });
+
+    // Lightbox click — reuse mouseDownX from above
+    tiles.forEach(tile => {
+      tile.addEventListener('click', e => {
+        if (Math.abs(e.clientX - mouseDownX) > 6) return;
+        const lb = document.getElementById('lightbox');
+        document.getElementById('lightbox-img').src = tile.querySelector('img').src;
+        lb.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      });
+    });
   })();
 
   function submitRSVP(e) {
@@ -1089,32 +1109,16 @@
     document.getElementById('rsvp-success').style.display = 'block';
   }
 
-  // Lightbox
+  // Lightbox close handlers
   (function () {
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
     const lbClose = document.getElementById('lightbox-close');
-
-    let mouseDownX = 0;
-
-    document.querySelector('.photos-carousel').addEventListener('mousedown', e => { mouseDownX = e.clientX; });
-
-    document.querySelectorAll('.photo-tile').forEach(tile => {
-      tile.addEventListener('click', e => {
-        if (Math.abs(e.clientX - mouseDownX) > 6) return;
-        const src = tile.querySelector('img').src;
-        lbImg.src = src;
-        lb.classList.add('is-open');
-        document.body.style.overflow = 'hidden';
-      });
-    });
-
     function closeLightbox() {
       lb.classList.remove('is-open');
       document.body.style.overflow = '';
       lbImg.src = '';
     }
-
     lbClose.addEventListener('click', closeLightbox);
     lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
