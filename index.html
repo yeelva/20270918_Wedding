@@ -1144,8 +1144,9 @@
     }, { passive: true });
 
     const STRINGS = [
-      { x0F: 0, y0: 2,  x1F: 1,    y1: 2, cpxF: 0.95, cpy: 305, n: 19 },
-      { x0F: 0, y0: 75, x1F: 0.60, y1: 2, cpxF: 0.05, cpy: 305, n: 14 },
+      { x0F: 0,    y0: 2,  x1F: 1,    y1: 2, cpxF: 0.95, cpy: 305, n: 19 },
+      { x0F: 0,    y0: 75, x1F: 0.60, y1: 2, cpxF: 0.05, cpy: 305, n: 14 },
+      { x0F: 0.57, y0: 60, x1F: 0.96, y1: 185, cpxF: 0.77, cpy: 210, n: 9  },
     ];
 
     function bez(t, x0, y0, cpx, cpy, x1, y1) {
@@ -1174,7 +1175,7 @@
 
     // Cache bulb positions — only recompute when sway shifts enough
     let lastSway = null;
-    const posCache = STRINGS.map(() => []);
+    const posCache = STRINGS.map(() => []);  // one entry per string, auto-sized
 
     function draw(ts) {
       inertia += scrollVel * 0.10;
@@ -1238,10 +1239,6 @@
     let rafPending = false;
     let currentCenter = null;
 
-    // Lock flag — prevents scroll events from overriding a manually set center
-    let centerLocked = false;
-    let centerLockTimer = null;
-
     function setCenter(tile) {
       if (currentCenter === tile) return;
       if (currentCenter) currentCenter.classList.remove('is-center');
@@ -1250,7 +1247,6 @@
     }
 
     function updateCenter() {
-      if (centerLocked) return;
       const cx = carousel.scrollLeft + carousel.offsetWidth / 2;
       let closest = null, minDist = Infinity;
       tiles.forEach(t => {
@@ -1266,21 +1262,10 @@
       requestAnimationFrame(() => { rafPending = false; updateCenter(); });
     }
 
-    // Custom smooth scroll — cancels previous animation before starting new one
-    let scrollRaf = null;
+    // (smoothScroll removed — centering is now scroll-position driven only)
     function smoothScroll(target, duration) {
-      if (scrollRaf) { cancelAnimationFrame(scrollRaf); scrollRaf = null; }
-      const start = carousel.scrollLeft;
-      const delta = target - start;
-      if (Math.abs(delta) < 1) return;
-      const t0 = performance.now();
-      function step(now) {
-        const p = Math.min((now - t0) / duration, 1);
-        const ease = 1 - Math.pow(1 - p, 3);
-        carousel.scrollLeft = start + delta * ease;
-        if (p < 1) { scrollRaf = requestAnimationFrame(step); }
-        else { scrollRaf = null; }
-      }
+      // no-op kept for safety
+      void target; void duration;
       scrollRaf = requestAnimationFrame(step);
     }
 
@@ -1299,28 +1284,8 @@
       window.addEventListener('load', initCenter);
     }
 
-    // Hover to scroll (desktop) — hovering any tile centres it (debounced)
-    let hoverTimer = null;
-    tiles.forEach(tile => {
-      tile.addEventListener('mouseenter', () => {
-        clearTimeout(hoverTimer);
-        hoverTimer = setTimeout(() => {
-          const target = Math.max(0, tile.offsetLeft + tile.offsetWidth / 2 - carousel.offsetWidth / 2);
-          // 350ms for nearby, 450ms for far right
-          const distance = Math.abs(target - carousel.scrollLeft);
-          const duration = 2500;
-          // Lock center so scroll events don't flicker it during animation
-          clearTimeout(centerLockTimer);
-          centerLocked = true;
-          setCenter(tile);
-          centerLockTimer = setTimeout(() => { centerLocked = false; }, duration + 100);
-          smoothScroll(target, duration);
-        }, 150);
-      });
-      tile.addEventListener('mouseleave', () => {
-        clearTimeout(hoverTimer);
-      });
-    });
+    // Scroll-based centering only — no hover-to-scroll.
+    // The tile closest to the viewport centre gets is-center (enlarged) as you swipe.
 
     // Drag to scroll
     let down = false, startX, startScroll;
