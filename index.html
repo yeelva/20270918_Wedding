@@ -1085,11 +1085,11 @@
 
   // ── String lights ────────────────────────────────────────────────────────
   (function () {
-    const H = 140;
+    const H = 210;
     const canvas = document.createElement('canvas');
     canvas.id = 'string-lights';
     Object.assign(canvas.style, {
-      position: 'fixed', top: '0', left: '0',
+      position: 'fixed', top: '-8px', left: '0',
       width: '100%', height: H + 'px',
       pointerEvents: 'none', zIndex: '8'
     });
@@ -1111,19 +1111,47 @@
       scrollVel = dy;
     }, { passive: true });
 
-    // 3 big sweeping droops, each carrying 6 bulbs along the wire
-    const SEGS    = 3;
-    const TOP     = 2;
-    const CP_DROP = 220;  // control-point offset; visual droop at midpoint ≈ 110px
-    const BULB_T  = [0.10, 0.24, 0.38, 0.52, 0.66, 0.80, 0.90]; // t positions per seg
+    // Curtain-open layout: control points far left/right, side-wall anchors for organic crossings.
+    // Crossing strings start lower on the wall and end toward centre for more dramatic angle.
+    const STRINGS = [
+      // Left curtain: deep left-side droop, flat on the right
+      { x0F: 0,    y0: 2,   x1F: 1,    y1: 2,   cpxF: 0.05, cpy: 305, n: 12 },
+      // Right curtain: mirror
+      { x0F: 0,    y0: 2,   x1F: 1,    y1: 2,   cpxF: 0.95, cpy: 305, n: 12 },
+      // Left-wall (low) → centre-top: steeper curtain angle
+      { x0F: 0,    y0: 152, x1F: 0.56, y1: 3,   cpxF: 0.18, cpy: 248, n: 10 },
+      // Centre-top → right-wall (low): mirror
+      { x0F: 0.44, y0: 3,   x1F: 1,    y1: 152, cpxF: 0.82, cpy: 248, n: 10 },
+    ];
 
-    // Quadratic bezier point at parameter t
     function bez(t, x0, y0, cpx, cpy, x1, y1) {
       const mt = 1 - t;
       return {
         x: mt*mt*x0 + 2*mt*t*cpx + t*t*x1,
         y: mt*mt*y0 + 2*mt*t*cpy + t*t*y1
       };
+    }
+
+    // Arc-length parameterisation — returns n evenly-spaced t values along the curve
+    function evenTParams(x0, y0, cpx, cpy, x1, y1, n) {
+      const S = 50;
+      const cumLen = [0];
+      let prev = bez(0, x0, y0, cpx, cpy, x1, y1);
+      for (let i = 1; i <= S; i++) {
+        const cur = bez(i / S, x0, y0, cpx, cpy, x1, y1);
+        const dx = cur.x - prev.x, dy = cur.y - prev.y;
+        cumLen.push(cumLen[i - 1] + Math.sqrt(dx * dx + dy * dy));
+        prev = cur;
+      }
+      const total = cumLen[S];
+      const ts = [];
+      for (let j = 0; j < n; j++) {
+        const target = ((j + 0.5) / n) * total;
+        let lo = 0, hi = S;
+        while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (cumLen[mid] < target) lo = mid; else hi = mid; }
+        ts.push((lo + (target - cumLen[lo]) / (cumLen[hi] - cumLen[lo])) / S);
+      }
+      return ts;
     }
 
     function draw(ts) {
@@ -1134,44 +1162,48 @@
 
       ctx.clearRect(0, 0, W, H);
 
-      for (let i = 0; i < SEGS; i++) {
-        const x0  = (i / SEGS) * W;
-        const x1  = ((i + 1) / SEGS) * W;
-        const cpx = (x0 + x1) / 2 + sway;
-        const cpy = TOP + CP_DROP;
+      for (const s of STRINGS) {
+        const x0  = s.x0F * W;
+        const x1  = s.x1F * W;
+        const cpx = s.cpxF * W + sway;
+        const cpy = s.cpy;
 
-        // Wire
+        // Wire — soft warm amber-brown
         ctx.beginPath();
-        ctx.moveTo(x0, TOP);
-        ctx.quadraticCurveTo(cpx, cpy, x1, TOP);
-        ctx.strokeStyle = 'rgba(60, 32, 10, 0.50)';
-        ctx.lineWidth = 1.1;
+        ctx.moveTo(x0, s.y0);
+        ctx.quadraticCurveTo(cpx, cpy, x1, s.y1);
+        ctx.strokeStyle = 'rgba(225, 190, 130, 0.38)';
+        ctx.lineWidth = 0.7;
         ctx.stroke();
 
-        // Bulbs distributed along the wire
-        for (const t of BULB_T) {
-          const { x: bx, y: by } = bez(t, x0, TOP, cpx, cpy, x1, TOP);
+        // Bulbs at arc-length-even positions
+        const tParams = evenTParams(x0, s.y0, cpx, cpy, x1, s.y1, s.n);
+        for (const t of tParams) {
+          const { x: bx, y: by } = bez(t, x0, s.y0, cpx, cpy, x1, s.y1);
+          if (by < 0 || by > H) continue; // skip if outside canvas
 
-          // Outer glow — amber/neon-red palette
-          const g = ctx.createRadialGradient(bx, by, 0, bx, by, 22);
-          g.addColorStop(0,    'rgba(255,185,70,0.90)');
-          g.addColorStop(0.28, 'rgba(255,110,56,0.55)');
-          g.addColorStop(1,    'rgba(255,80,40,0)');
+          // Organic dispersive glow — blurred layers, amber-red palette
+          ctx.save();
+          ctx.filter = 'blur(9px)';
+          ctx.fillStyle = 'rgba(255,125,45,0.72)';
           ctx.beginPath();
-          ctx.arc(bx, by, 22, 0, Math.PI * 2);
-          ctx.fillStyle = g;
+          ctx.arc(bx, by, 12, 0, Math.PI * 2);
           ctx.fill();
-
-          // Bulb body
+          ctx.filter = 'blur(20px)';
+          ctx.fillStyle = 'rgba(255,72,32,0.42)';
           ctx.beginPath();
-          ctx.arc(bx, by, 5, 0, Math.PI * 2);
-          ctx.fillStyle = '#ffe07a';
+          ctx.arc(bx, by, 8, 0, Math.PI * 2);
           ctx.fill();
+          ctx.restore();
 
-          // Specular highlight
+          // Bulb body — bright centre fading to amber
+          const bulbG = ctx.createRadialGradient(bx, by, 0, bx, by, 4.5);
+          bulbG.addColorStop(0,   '#fff8e0');
+          bulbG.addColorStop(0.45,'#ffd060');
+          bulbG.addColorStop(1,   '#ffb84a');
           ctx.beginPath();
-          ctx.arc(bx - 1.6, by - 1.6, 1.8, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,215,0.88)';
+          ctx.arc(bx, by, 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = bulbG;
           ctx.fill();
         }
       }
