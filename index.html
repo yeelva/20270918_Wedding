@@ -157,7 +157,8 @@
         0 0 6px var(--neon),
         0 0 18px rgba(255,110,86,0.85),
         0 0 52px rgba(232,85,64,0.50),
-        0 0 95px rgba(200,64,48,0.40);
+        0 0 95px rgba(200,64,48,0.40),
+        0 0 160px rgba(255,160,70,0.28);
       margin-bottom: 28px;
     }
 
@@ -1153,8 +1154,10 @@
     }
 
     function draw(ts) {
-      inertia += (scrollVel * 0.38 - inertia) * 0.11;
-      scrollVel *= 0.78;
+      inertia += scrollVel * 0.5;           // scroll gives a push
+      inertia -= inertia * 0.055;           // spring pulls back to centre
+      inertia *= 0.94;                      // damping — stays swinging a while
+      scrollVel *= 0.65;
       const naturalSway = Math.sin(ts / 2700) * 2.5;
       const sway = naturalSway + inertia;
 
@@ -1180,27 +1183,48 @@
           const { x: bx, y: by } = bez(t, x0, s.y0, cpx, cpy, x1, s.y1);
           if (by < 0 || by > H) continue; // skip if outside canvas
 
-          // Organic dispersive glow — blurred layers, amber-red palette
+          // Organic dispersive glow — elliptical layers so light spreads wider than tall
           ctx.save();
-          ctx.filter = 'blur(9px)';
-          ctx.fillStyle = 'rgba(255,160,70,0.72)';
+          ctx.translate(bx, by);
+          ctx.scale(2.2, 1);
+          ctx.filter = 'blur(16px)';
+          ctx.fillStyle = 'rgba(255,125,65,0.78)';
           ctx.beginPath();
-          ctx.arc(bx, by, 12, 0, Math.PI * 2);
+          ctx.arc(0, 0, 10, 0, Math.PI * 2);
           ctx.fill();
-          ctx.filter = 'blur(20px)';
-          ctx.fillStyle = 'rgba(232,110,50,0.45)';
+          ctx.restore();
+
+          ctx.save();
+          ctx.translate(bx, by);
+          ctx.scale(3.2, 1);
+          ctx.filter = 'blur(48px)';
+          ctx.fillStyle = 'rgba(232,88,48,0.54)';
           ctx.beginPath();
-          ctx.arc(bx, by, 8, 0, Math.PI * 2);
+          ctx.arc(0, 0, 8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          ctx.save();
+          ctx.translate(bx, by);
+          ctx.scale(4.5, 1);
+          ctx.filter = 'blur(80px)';
+          ctx.fillStyle = 'rgba(255,100,50,0.30)';
+          ctx.beginPath();
+          ctx.arc(0, 0, 6, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
 
           // Bulb body — bright centre fading to neon salmon-red
-          const bulbG = ctx.createRadialGradient(bx, by, 0, bx, by, 4.5);
-          bulbG.addColorStop(0,   '#fffde0');
-          bulbG.addColorStop(0.45,'#ffd080');
-          bulbG.addColorStop(1,   '#ff8844');
+          const bulbG = ctx.createRadialGradient(bx, by, 0, bx, by, 6);
+          bulbG.addColorStop(0,    '#fffde8');
+          bulbG.addColorStop(0.12, '#ffecb8');
+          bulbG.addColorStop(0.28, '#ffd898');
+          bulbG.addColorStop(0.46, '#ffbc78');
+          bulbG.addColorStop(0.64, '#ffa060');
+          bulbG.addColorStop(0.82, '#ff8248');
+          bulbG.addColorStop(1,    'rgba(255,100,55,0)');
           ctx.beginPath();
-          ctx.arc(bx, by, 4.5, 0, Math.PI * 2);
+          ctx.arc(bx, by, 6, 0, Math.PI * 2);
           ctx.fillStyle = bulbG;
           ctx.fill();
         }
