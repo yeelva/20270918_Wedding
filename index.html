@@ -156,8 +156,8 @@
       text-shadow:
         0 0 6px var(--neon),
         0 0 18px rgba(255,110,86,0.85),
-        0 0 50px rgba(232,85,64,0.45),
-        0 0 90px rgba(200,64,48,0.32);
+        0 0 52px rgba(232,85,64,0.50),
+        0 0 95px rgba(200,64,48,0.40);
       margin-bottom: 28px;
     }
 
@@ -1156,12 +1156,15 @@
         clearTimeout(hoverTimer);
         hoverTimer = setTimeout(() => {
           const target = Math.max(0, tile.offsetLeft + tile.offsetWidth / 2 - carousel.offsetWidth / 2);
+          // Duration scales with distance so far tiles don't feel rushed
+          const distance = Math.abs(target - carousel.scrollLeft);
+          const duration = Math.min(1600, Math.max(600, distance * 0.9));
           // Lock center so scroll events don't flicker it during animation
           clearTimeout(centerLockTimer);
           centerLocked = true;
           setCenter(tile);
-          centerLockTimer = setTimeout(() => { centerLocked = false; }, 650);
-          smoothScroll(target, 600);
+          centerLockTimer = setTimeout(() => { centerLocked = false; }, duration + 100);
+          smoothScroll(target, duration);
         }, 150);
       });
       tile.addEventListener('mouseleave', () => {
