@@ -1091,24 +1091,47 @@
     let rafPending = false;
     let currentCenter = null;
 
+    // Lock flag — prevents scroll events from overriding a manually set center
+    let centerLocked = false;
+    let centerLockTimer = null;
+
+    function setCenter(tile) {
+      if (currentCenter === tile) return;
+      if (currentCenter) currentCenter.classList.remove('is-center');
+      tile.classList.add('is-center');
+      currentCenter = tile;
+    }
+
     function updateCenter() {
+      if (centerLocked) return;
       const cx = carousel.scrollLeft + carousel.offsetWidth / 2;
       let closest = null, minDist = Infinity;
       tiles.forEach(t => {
         const dist = Math.abs(t.offsetLeft + t.offsetWidth / 2 - cx);
         if (dist < minDist) { minDist = dist; closest = t; }
       });
-      if (closest !== currentCenter) {
-        if (currentCenter) currentCenter.classList.remove('is-center');
-        if (closest) closest.classList.add('is-center');
-        currentCenter = closest;
-      }
+      if (closest) setCenter(closest);
     }
 
     function scheduleUpdate() {
       if (rafPending) return;
       rafPending = true;
       requestAnimationFrame(() => { rafPending = false; updateCenter(); });
+    }
+
+    // Custom smooth scroll — slower, ease-out cubic
+    function smoothScroll(target, duration) {
+      const start = carousel.scrollLeft;
+      const delta = target - start;
+      if (Math.abs(delta) < 1) return;
+      const t0 = performance.now();
+      function step(now) {
+        const p = Math.min((now - t0) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        carousel.scrollLeft = start + delta * ease;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
     }
 
     carousel.addEventListener('scroll', scheduleUpdate, { passive: true });
@@ -1132,15 +1155,14 @@
       tile.addEventListener('mouseenter', () => {
         clearTimeout(hoverTimer);
         hoverTimer = setTimeout(() => {
-          const target = tile.offsetLeft + tile.offsetWidth / 2 - carousel.offsetWidth / 2;
-          carousel.scrollTo({ left: target, behavior: 'smooth' });
-          // Manually mark as center in case scroll can't move (e.g. first tile at left edge)
-          if (currentCenter !== tile) {
-            if (currentCenter) currentCenter.classList.remove('is-center');
-            tile.classList.add('is-center');
-            currentCenter = tile;
-          }
-        }, 160);
+          const target = Math.max(0, tile.offsetLeft + tile.offsetWidth / 2 - carousel.offsetWidth / 2);
+          // Lock center so scroll events don't flicker it during animation
+          clearTimeout(centerLockTimer);
+          centerLocked = true;
+          setCenter(tile);
+          centerLockTimer = setTimeout(() => { centerLocked = false; }, 650);
+          smoothScroll(target, 600);
+        }, 150);
       });
       tile.addEventListener('mouseleave', () => {
         clearTimeout(hoverTimer);
