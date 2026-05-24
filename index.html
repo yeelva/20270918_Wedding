@@ -1094,7 +1094,8 @@
     Object.assign(canvas.style, {
       position: 'absolute', top: '-8px', left: '0',
       width: '100%', height: H + 'px',
-      pointerEvents: 'none', zIndex: '8'
+      pointerEvents: 'none', zIndex: '8',
+      willChange: 'transform', transform: 'translateZ(0)'
     });
     document.body.prepend(canvas);
 
@@ -1102,11 +1103,39 @@
     let W = window.innerWidth;
     let lastScrollY = 0, scrollVel = 0, inertia = 0;
 
-    function resize() {
-      W = window.innerWidth;
-      canvas.width = W;
-      canvas.height = H;
-    }
+    // ── Pre-render glow sprite once (avoids per-frame ctx.filter blur calls) ──
+    const SR = 90; // sprite half-size
+    const glowSprite = document.createElement('canvas');
+    glowSprite.width = SR * 2; glowSprite.height = SR * 2;
+    const gc = glowSprite.getContext('2d');
+    gc.filter = 'blur(16px)';
+    gc.fillStyle = 'rgba(255,125,65,0.78)';
+    gc.beginPath(); gc.arc(SR, SR, 10, 0, Math.PI * 2); gc.fill();
+    gc.filter = 'blur(48px)';
+    gc.fillStyle = 'rgba(232,88,48,0.54)';
+    gc.beginPath(); gc.arc(SR, SR, 8, 0, Math.PI * 2); gc.fill();
+    gc.filter = 'blur(80px)';
+    gc.fillStyle = 'rgba(255,100,50,0.30)';
+    gc.beginPath(); gc.arc(SR, SR, 6, 0, Math.PI * 2); gc.fill();
+
+    // ── Pre-render bulb body sprite once ──
+    const BR = 7;
+    const bulbSprite = document.createElement('canvas');
+    bulbSprite.width = BR * 2 + 2; bulbSprite.height = BR * 2 + 2;
+    const bc = bulbSprite.getContext('2d');
+    const bsc = BR + 1;
+    const bulbG = bc.createRadialGradient(bsc, bsc, 0, bsc, bsc, BR);
+    bulbG.addColorStop(0,    '#fffde8');
+    bulbG.addColorStop(0.12, '#ffecb8');
+    bulbG.addColorStop(0.28, '#ffd898');
+    bulbG.addColorStop(0.46, '#ffbc78');
+    bulbG.addColorStop(0.64, '#ffa060');
+    bulbG.addColorStop(0.82, '#ff8248');
+    bulbG.addColorStop(1,    'rgba(255,100,55,0)');
+    bc.beginPath(); bc.arc(bsc, bsc, BR, 0, Math.PI * 2);
+    bc.fillStyle = bulbG; bc.fill();
+
+    function resize() { W = window.innerWidth; canvas.width = W; canvas.height = H; }
     window.addEventListener('resize', resize, { passive: true });
     window.addEventListener('scroll', () => {
       const dy = window.scrollY - lastScrollY;
@@ -1114,120 +1143,81 @@
       scrollVel = dy;
     }, { passive: true });
 
-    // Curtain-open layout: control points far left/right, side-wall anchors for organic crossings.
-    // Crossing strings start lower on the wall and end toward centre for more dramatic angle.
     const STRINGS = [
-      // Left curtain: full width, symmetric droop on left side
-      { x0F: 0, y0: 2, x1F: 1, y1: 2, cpxF: 0.95, cpy: 305, n: 19 },
-      // Right string: right anchor lower on right wall, left end stops at ~60% width
+      { x0F: 0, y0: 2,  x1F: 1,    y1: 2, cpxF: 0.95, cpy: 305, n: 19 },
       { x0F: 0, y0: 75, x1F: 0.60, y1: 2, cpxF: 0.05, cpy: 305, n: 14 },
     ];
 
     function bez(t, x0, y0, cpx, cpy, x1, y1) {
       const mt = 1 - t;
-      return {
-        x: mt*mt*x0 + 2*mt*t*cpx + t*t*x1,
-        y: mt*mt*y0 + 2*mt*t*cpy + t*t*y1
-      };
+      return { x: mt*mt*x0 + 2*mt*t*cpx + t*t*x1, y: mt*mt*y0 + 2*mt*t*cpy + t*t*y1 };
     }
 
-    // Arc-length parameterisation — returns n evenly-spaced t values along the curve
     function evenTParams(x0, y0, cpx, cpy, x1, y1, n) {
-      const S = 50;
-      const cumLen = [0];
+      const S = 50, cumLen = [0];
       let prev = bez(0, x0, y0, cpx, cpy, x1, y1);
       for (let i = 1; i <= S; i++) {
-        const cur = bez(i / S, x0, y0, cpx, cpy, x1, y1);
+        const cur = bez(i/S, x0, y0, cpx, cpy, x1, y1);
         const dx = cur.x - prev.x, dy = cur.y - prev.y;
-        cumLen.push(cumLen[i - 1] + Math.sqrt(dx * dx + dy * dy));
+        cumLen.push(cumLen[i-1] + Math.sqrt(dx*dx + dy*dy));
         prev = cur;
       }
-      const total = cumLen[S];
-      const ts = [];
+      const total = cumLen[S], ts = [];
       for (let j = 0; j < n; j++) {
-        const target = ((j + 0.5) / n) * total;
+        const target = ((j+0.5)/n) * total;
         let lo = 0, hi = S;
-        while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (cumLen[mid] < target) lo = mid; else hi = mid; }
+        while (hi - lo > 1) { const mid = (lo+hi)>>1; if (cumLen[mid] < target) lo = mid; else hi = mid; }
         ts.push((lo + (target - cumLen[lo]) / (cumLen[hi] - cumLen[lo])) / S);
       }
       return ts;
     }
 
+    // Cache bulb positions — only recompute when sway shifts enough
+    let lastSway = null;
+    const posCache = STRINGS.map(() => []);
+
     function draw(ts) {
-      inertia += scrollVel * 0.10;                        // gentle push from scroll
-      inertia -= inertia * 0.04;                          // spring pulls back to centre
-      inertia *= 0.88;                                    // damping — settles fairly quickly
-      inertia = Math.max(-10, Math.min(10, inertia));     // hard clamp — no wild swings
+      inertia += scrollVel * 0.10;
+      inertia -= inertia * 0.04;
+      inertia *= 0.88;
+      inertia = Math.max(-10, Math.min(10, inertia));
       scrollVel *= 0.55;
       const naturalSway = Math.sin(ts / 2700) * 2.5;
       const sway = naturalSway + inertia;
 
       ctx.clearRect(0, 0, W, H);
 
-      for (const s of STRINGS) {
-        const x0  = s.x0F * W;
-        const x1  = s.x1F * W;
-        const cpx = s.cpxF * W + sway;
-        const cpy = s.cpy;
+      // Recompute bulb positions only when sway changes noticeably
+      const swayChanged = lastSway === null || Math.abs(sway - lastSway) > 0.4;
+      if (swayChanged) {
+        lastSway = sway;
+        STRINGS.forEach((s, si) => {
+          const x0 = s.x0F * W, x1 = s.x1F * W, cpx = s.cpxF * W + sway;
+          posCache[si] = evenTParams(x0, s.y0, cpx, s.cpy, x1, s.y1, s.n)
+            .map(t => bez(t, x0, s.y0, cpx, s.cpy, x1, s.y1));
+        });
+      }
 
-        // Wire — soft warm amber-brown
+      for (let si = 0; si < STRINGS.length; si++) {
+        const s = STRINGS[si];
+        const x0 = s.x0F * W, x1 = s.x1F * W, cpx = s.cpxF * W + sway;
+
+        // Wire
         ctx.beginPath();
         ctx.moveTo(x0, s.y0);
-        ctx.quadraticCurveTo(cpx, cpy, x1, s.y1);
-        ctx.strokeStyle = 'rgba(230, 175, 155, 0.38)';
+        ctx.quadraticCurveTo(cpx, s.cpy, x1, s.y1);
+        ctx.strokeStyle = 'rgba(230,175,155,0.38)';
         ctx.lineWidth = 0.7;
         ctx.stroke();
 
-        // Bulbs at arc-length-even positions
-        const tParams = evenTParams(x0, s.y0, cpx, cpy, x1, s.y1, s.n);
-        for (const t of tParams) {
-          const { x: bx, y: by } = bez(t, x0, s.y0, cpx, cpy, x1, s.y1);
-          if (by < 0 || by > H) continue; // skip if outside canvas
-
-          // Organic dispersive glow — elliptical layers so light spreads wider than tall
-          ctx.save();
-          ctx.translate(bx, by);
-          ctx.scale(2.2, 1);
-          ctx.filter = 'blur(16px)';
-          ctx.fillStyle = 'rgba(255,125,65,0.78)';
-          ctx.beginPath();
-          ctx.arc(0, 0, 10, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-
-          ctx.save();
-          ctx.translate(bx, by);
-          ctx.scale(3.2, 1);
-          ctx.filter = 'blur(48px)';
-          ctx.fillStyle = 'rgba(232,88,48,0.54)';
-          ctx.beginPath();
-          ctx.arc(0, 0, 8, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-
-          ctx.save();
-          ctx.translate(bx, by);
-          ctx.scale(4.5, 1);
-          ctx.filter = 'blur(80px)';
-          ctx.fillStyle = 'rgba(255,100,50,0.30)';
-          ctx.beginPath();
-          ctx.arc(0, 0, 6, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-
-          // Bulb body — bright centre fading to neon salmon-red
-          const bulbG = ctx.createRadialGradient(bx, by, 0, bx, by, 6);
-          bulbG.addColorStop(0,    '#fffde8');
-          bulbG.addColorStop(0.12, '#ffecb8');
-          bulbG.addColorStop(0.28, '#ffd898');
-          bulbG.addColorStop(0.46, '#ffbc78');
-          bulbG.addColorStop(0.64, '#ffa060');
-          bulbG.addColorStop(0.82, '#ff8248');
-          bulbG.addColorStop(1,    'rgba(255,100,55,0)');
-          ctx.beginPath();
-          ctx.arc(bx, by, 6, 0, Math.PI * 2);
-          ctx.fillStyle = bulbG;
-          ctx.fill();
+        // Bulbs — stamp pre-rendered sprites (no per-frame blur)
+        for (const { x: bx, y: by } of posCache[si]) {
+          if (by < 0 || by > H) continue;
+          // Glow: draw sprite stretched wide for elliptical dispersion
+          const gw = SR * 5, gh = SR * 1.4;
+          ctx.drawImage(glowSprite, bx - gw/2, by - gh/2, gw, gh);
+          // Bulb body
+          ctx.drawImage(bulbSprite, bx - bsc, by - bsc);
         }
       }
 
@@ -1318,7 +1308,7 @@
           const target = Math.max(0, tile.offsetLeft + tile.offsetWidth / 2 - carousel.offsetWidth / 2);
           // 350ms for nearby, 450ms for far right
           const distance = Math.abs(target - carousel.scrollLeft);
-          const duration = Math.min(450, Math.max(350, 350 + distance * 0.02));
+          const duration = 2500;
           // Lock center so scroll events don't flicker it during animation
           clearTimeout(centerLockTimer);
           centerLocked = true;
