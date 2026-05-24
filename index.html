@@ -431,7 +431,7 @@
     .qa-q {
       font-family: 'Playfair Display', serif;
       font-size: 1.05rem;
-      color: var(--ink);
+      color: var(--sage-mid);
       margin-bottom: 10px;
       line-height: 1.3;
     }
@@ -565,7 +565,7 @@
     .footer-names {
       font-family: 'Playfair Display', serif;
       font-size: 1.8rem;
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.88);
       margin-bottom: 4px;
     }
 
@@ -774,7 +774,7 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-mark"><span class="nav-mark-full">Elva & Ian</span><span class="nav-mark-short">E & I</span></div>
+  <div class="nav-mark"><span class="nav-mark-full">Ian & Elva</span><span class="nav-mark-short">I & E</span></div>
   <ul>
     <li><a href="#schedule">Schedule</a></li>
     <li><a href="#travel">Travel</a></li>
@@ -788,7 +788,7 @@
 <section id="hero">
   <div class="neon-frame">
     <p class="neon-invite">You are warmly invited to</p>
-    <h1 class="neon-title">Elva & Ian's Wedding</h1>
+    <h1 class="neon-title">Ian & Elva's Wedding</h1>
     <div class="neon-rule">
       <!-- left line -->
       <svg width="48" height="18" viewBox="0 0 48 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1074,7 +1074,7 @@
 <!-- FOOTER -->
 <footer>
   <div>
-    <div class="footer-names">Elva & Ian</div>
+    <div class="footer-names">Ian & Elva</div>
     <div class="footer-date">September 18, 2027 · Mill Valley, CA</div>
   </div>
   <div class="footer-hanzi">囍</div>
@@ -1127,6 +1127,14 @@
     } else {
       window.addEventListener('load', initCenter);
     }
+
+    // Hover to scroll (desktop) — hovering any tile centres it
+    tiles.forEach(tile => {
+      tile.addEventListener('mouseenter', () => {
+        const target = tile.offsetLeft + tile.offsetWidth / 2 - carousel.offsetWidth / 2;
+        carousel.scrollTo({ left: target, behavior: 'smooth' });
+      });
+    });
 
     // Drag to scroll
     let down = false, startX, startScroll;
