@@ -315,7 +315,7 @@
     }
 
     /* ── TRAVEL ── */
-    #travel { background: var(--sage-pale); }
+    #travel { background: var(--sage-pale); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Ctext x='50%25' y='55%25' font-family='serif' font-size='72' text-anchor='middle' dominant-baseline='middle' fill='%23c8a84e' opacity='0.09'%3E%E5%9B%8D%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Ctext x='50%25' y='55%25' font-family='serif' font-size='72' text-anchor='middle' dominant-baseline='middle' fill='%23c8a84e' opacity='0.09'%3E%E5%9B%8D%3C/text%3E%3C/svg%3E"); background-size: 160px 160px; background-position: 0 0, 80px 80px; }
 
     .travel-grid {
       display: grid;
@@ -420,7 +420,7 @@
     .reg-link:hover { color: var(--ink); }
 
     /* ── Q&A ── */
-    #qa { background: var(--sage-pale); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Ctext x='50%25' y='55%25' font-family='Noto Sans SC%2C PingFang SC%2C sans-serif' font-size='72' text-anchor='middle' dominant-baseline='middle' fill='%23c8a84e' opacity='0.09'%3E%E5%9B%8D%3C/text%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Ctext x='50%25' y='55%25' font-family='Noto Sans SC%2C PingFang SC%2C sans-serif' font-size='72' text-anchor='middle' dominant-baseline='middle' fill='%23c8a84e' opacity='0.09'%3E%E5%9B%8D%3C/text%3E%3C/svg%3E"); background-size: 160px 160px; background-position: 0 0, 80px 80px; }
+    #qa { background: var(--sage-pale); }
 
     .qa-list {
       display: grid;
@@ -1081,6 +1081,100 @@
 
 <script>
 
+  // ── String lights ────────────────────────────────────────────────────────
+  (function () {
+    const H = 100;
+    const canvas = document.createElement('canvas');
+    canvas.id = 'string-lights';
+    Object.assign(canvas.style, {
+      position: 'fixed', top: '0', left: '0',
+      width: '100%', height: H + 'px',
+      pointerEvents: 'none', zIndex: '8'
+    });
+    document.body.prepend(canvas);
+
+    const ctx = canvas.getContext('2d');
+    let W = window.innerWidth;
+    let lastScrollY = 0, scrollVel = 0, inertia = 0;
+
+    function resize() {
+      W = window.innerWidth;
+      canvas.width = W;
+      canvas.height = H;
+    }
+    window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('scroll', () => {
+      const dy = window.scrollY - lastScrollY;
+      lastScrollY = window.scrollY;
+      scrollVel = dy;
+    }, { passive: true });
+
+    const SEGS   = 13;   // number of drooping segments
+    const TOP    = 2;    // attachment y
+    const CP_DROP = 118; // bezier control-point offset; visual droop ≈ CP_DROP/2 ≈ 59px
+
+    function draw(ts) {
+      // Scroll-inertia sway
+      inertia += (scrollVel * 0.38 - inertia) * 0.11;
+      scrollVel *= 0.78;
+      const naturalSway = Math.sin(ts / 2700) * 2.2;
+      const sway = naturalSway + inertia;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Wire
+      ctx.beginPath();
+      ctx.moveTo(0, TOP);
+      for (let i = 0; i < SEGS; i++) {
+        const x0  = (i / SEGS) * W;
+        const x1  = ((i + 1) / SEGS) * W;
+        const cpx = (x0 + x1) / 2 + sway;
+        const cpy = TOP + CP_DROP;
+        ctx.quadraticCurveTo(cpx, cpy, x1, TOP);
+      }
+      ctx.strokeStyle = 'rgba(60, 32, 10, 0.50)';
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+
+      // Bulbs — placed at the bezier midpoint (t=0.5): B = 0.25*P0 + 0.5*CP + 0.25*P1
+      for (let i = 0; i < SEGS; i++) {
+        const x0  = (i / SEGS) * W;
+        const x1  = ((i + 1) / SEGS) * W;
+        const cpx = (x0 + x1) / 2 + sway;
+        const cpy = TOP + CP_DROP;
+        const bx  = 0.25 * x0 + 0.5 * cpx + 0.25 * x1;
+        const by  = 0.5 * TOP + 0.5 * cpy;   // ≈ TOP + CP_DROP/2
+
+        // Outer glow — amber/neon-red palette
+        const g = ctx.createRadialGradient(bx, by, 0, bx, by, 22);
+        g.addColorStop(0,   'rgba(255,185,70,0.90)');
+        g.addColorStop(0.28,'rgba(255,110,56,0.55)');
+        g.addColorStop(1,   'rgba(255,80,40,0)');
+        ctx.beginPath();
+        ctx.arc(bx, by, 22, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+
+        // Bulb body
+        ctx.beginPath();
+        ctx.arc(bx, by, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffe07a';
+        ctx.fill();
+
+        // Bright specular
+        ctx.beginPath();
+        ctx.arc(bx - 1.6, by - 1.6, 1.8, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,215,0.88)';
+        ctx.fill();
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    resize();
+    window.addEventListener('load', resize);
+    requestAnimationFrame(draw);
+  })();
 
   // ── Photo carousel ──────────────────────────────────────────────────────
   (function () {
