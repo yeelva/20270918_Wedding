@@ -65,6 +65,8 @@
       font-style: italic;
       font-size: 1.1rem;
       color: var(--ink);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     nav ul { list-style: none; display: flex; gap: 40px; }
@@ -580,6 +582,8 @@
     }
 
     /* ── RESPONSIVE ── */
+    .nav-mark-short { display: none; }
+
     @media (max-width: 720px) {
       .neon-frame { padding: 40px 32px; }
       .info-strip-inner { grid-template-columns: 1fr; }
@@ -591,10 +595,17 @@
       .form-grid { grid-template-columns: 1fr; }
       .f-field.full { grid-column: span 1; }
       .section-wrap { padding: 64px 24px; }
-      nav { padding: 0 24px; }
+      nav { padding: 0 20px; }
       footer { flex-direction: column; gap: 20px; }
-      nav ul { gap: 20px; }
+      nav ul { gap: 14px; }
+      nav a { font-size: 0.62rem; letter-spacing: 0.10em; }
       .lantern-bg { display: none; }
+      /* nav mark: short version on mobile */
+      .nav-mark-full { display: none; }
+      .nav-mark-short { display: inline; }
+      /* photos title: single line on mobile */
+      .photos-title-wrap { padding: 32px 20px 0 !important; }
+      .photos-title-wrap h2 { font-size: 0.72rem !important; letter-spacing: 0.05em !important; white-space: nowrap; }
     }
 
     @media (max-width: 500px) {
@@ -743,7 +754,7 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-mark">Elva & Ian</div>
+  <div class="nav-mark"><span class="nav-mark-full">Elva & Ian</span><span class="nav-mark-short">E & I</span></div>
   <ul>
     <li><a href="#schedule">Schedule</a></li>
     <li><a href="#travel">Travel</a></li>
