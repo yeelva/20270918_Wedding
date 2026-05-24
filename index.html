@@ -624,6 +624,8 @@
       .footer-date { font-size: 0.56rem; letter-spacing: 0.08em; white-space: nowrap; }
       /* hide 囍 background pattern on mobile */
       #travel { background-image: none; }
+      /* hide string lights on mobile */
+      #string-lights { display: none; }
     }
 
     @media (max-width: 500px) {
@@ -1089,7 +1091,7 @@
     const canvas = document.createElement('canvas');
     canvas.id = 'string-lights';
     Object.assign(canvas.style, {
-      position: 'fixed', top: '-8px', left: '0',
+      position: 'absolute', top: '-8px', left: '0',
       width: '100%', height: H + 'px',
       pointerEvents: 'none', zIndex: '8'
     });
@@ -1172,7 +1174,7 @@
         ctx.beginPath();
         ctx.moveTo(x0, s.y0);
         ctx.quadraticCurveTo(cpx, cpy, x1, s.y1);
-        ctx.strokeStyle = 'rgba(225, 190, 130, 0.38)';
+        ctx.strokeStyle = 'rgba(230, 175, 155, 0.38)';
         ctx.lineWidth = 0.7;
         ctx.stroke();
 
@@ -1185,22 +1187,22 @@
           // Organic dispersive glow — blurred layers, amber-red palette
           ctx.save();
           ctx.filter = 'blur(9px)';
-          ctx.fillStyle = 'rgba(255,125,45,0.72)';
+          ctx.fillStyle = 'rgba(255,110,86,0.72)';
           ctx.beginPath();
           ctx.arc(bx, by, 12, 0, Math.PI * 2);
           ctx.fill();
           ctx.filter = 'blur(20px)';
-          ctx.fillStyle = 'rgba(255,72,32,0.42)';
+          ctx.fillStyle = 'rgba(232,85,64,0.45)';
           ctx.beginPath();
           ctx.arc(bx, by, 8, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
 
-          // Bulb body — bright centre fading to amber
+          // Bulb body — bright centre fading to neon salmon-red
           const bulbG = ctx.createRadialGradient(bx, by, 0, bx, by, 4.5);
-          bulbG.addColorStop(0,   '#fff8e0');
-          bulbG.addColorStop(0.45,'#ffd060');
-          bulbG.addColorStop(1,   '#ffb84a');
+          bulbG.addColorStop(0,   '#fff4ee');
+          bulbG.addColorStop(0.45,'#ffaa80');
+          bulbG.addColorStop(1,   '#ff6e56');
           ctx.beginPath();
           ctx.arc(bx, by, 4.5, 0, Math.PI * 2);
           ctx.fillStyle = bulbG;
