@@ -60,6 +60,22 @@
       height: 56px;
     }
 
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-hanzi {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.15rem;
+      color: var(--neon);
+      text-shadow: 0 0 6px var(--neon), 0 0 18px rgba(255,110,86,0.5);
+      opacity: 0.7;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
     .nav-mark {
       font-family: 'Playfair Display', serif;
       font-style: italic;
@@ -155,21 +171,14 @@
       margin: 0 auto 20px;
       gap: 10px;
     }
-    .neon-rule svg {
-      filter:
-        drop-shadow(0 0 4px var(--neon))
-        drop-shadow(0 0 10px rgba(255,110,86,0.65));
-    }
-    .neon-rule .emblem-hanzi {
-      font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      font-weight: 300;
-      font-size: 1.1rem;
-      color: var(--neon);
-      line-height: 1;
-      text-shadow:
-        0 0 5px var(--neon),
-        0 0 12px rgba(255,110,86,0.7),
-        0 0 24px rgba(232,85,64,0.4);
+    .neon-rule svg, .neon-rule .emblem-hanzi { display: none; }
+    .neon-rule::after {
+      content: '';
+      display: block;
+      width: 56px;
+      height: 1px;
+      background: var(--neon);
+      box-shadow: 0 0 5px var(--neon), 0 0 12px rgba(255,110,86,0.55);
     }
 
     .neon-date {
@@ -611,21 +620,12 @@
       /* nav mark: short version on mobile */
       .nav-mark-full { display: none; }
       .nav-mark-short { display: inline; }
+      .nav-hanzi { display: none; }
       /* photos title: single line on mobile */
       .photos-title-wrap { padding: 32px 20px 0 !important; }
       .photos-title-wrap h2 { font-size: 0.72rem !important; letter-spacing: 0.05em !important; white-space: nowrap; }
       /* footer date: single line on mobile */
       .footer-date { font-size: 0.56rem; letter-spacing: 0.08em; white-space: nowrap; }
-      /* emblem: hide 囍 and SVG lines, show plain glowing rule instead */
-      .neon-rule svg, .neon-rule .emblem-hanzi { display: none; }
-      .neon-rule::after {
-        content: '';
-        display: block;
-        width: 56px;
-        height: 1px;
-        background: var(--neon);
-        box-shadow: 0 0 5px var(--neon), 0 0 12px rgba(255,110,86,0.55);
-      }
     }
 
     @media (max-width: 500px) {
@@ -774,7 +774,10 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-mark"><span class="nav-mark-full">Ian & Elva</span><span class="nav-mark-short">I & E</span></div>
+  <div class="nav-left">
+    <span class="nav-hanzi">囍</span>
+    <div class="nav-mark"><span class="nav-mark-full">Ian & Elva</span><span class="nav-mark-short">I & E</span></div>
+  </div>
   <ul>
     <li><a href="#schedule">Schedule</a></li>
     <li><a href="#travel">Travel</a></li>
