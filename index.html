@@ -1119,8 +1119,10 @@
       requestAnimationFrame(() => { rafPending = false; updateCenter(); });
     }
 
-    // Custom smooth scroll — slower, ease-out cubic
+    // Custom smooth scroll — cancels previous animation before starting new one
+    let scrollRaf = null;
     function smoothScroll(target, duration) {
+      if (scrollRaf) { cancelAnimationFrame(scrollRaf); scrollRaf = null; }
       const start = carousel.scrollLeft;
       const delta = target - start;
       if (Math.abs(delta) < 1) return;
@@ -1129,9 +1131,10 @@
         const p = Math.min((now - t0) / duration, 1);
         const ease = 1 - Math.pow(1 - p, 3);
         carousel.scrollLeft = start + delta * ease;
-        if (p < 1) requestAnimationFrame(step);
+        if (p < 1) { scrollRaf = requestAnimationFrame(step); }
+        else { scrollRaf = null; }
       }
-      requestAnimationFrame(step);
+      scrollRaf = requestAnimationFrame(step);
     }
 
     carousel.addEventListener('scroll', scheduleUpdate, { passive: true });
@@ -1156,9 +1159,9 @@
         clearTimeout(hoverTimer);
         hoverTimer = setTimeout(() => {
           const target = Math.max(0, tile.offsetLeft + tile.offsetWidth / 2 - carousel.offsetWidth / 2);
-          // Duration scales with distance so far tiles don't feel rushed
+          // Duration scales with distance — min 800ms, ~1.2ms per px for far tiles
           const distance = Math.abs(target - carousel.scrollLeft);
-          const duration = Math.min(1600, Math.max(600, distance * 0.9));
+          const duration = Math.min(2200, Math.max(800, distance * 1.2));
           // Lock center so scroll events don't flicker it during animation
           clearTimeout(centerLockTimer);
           centerLocked = true;
