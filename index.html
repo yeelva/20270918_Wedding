@@ -622,6 +622,8 @@
       .photos-title-wrap h2 { font-size: 0.72rem !important; letter-spacing: 0.05em !important; white-space: nowrap; }
       /* footer date: single line on mobile */
       .footer-date { font-size: 0.56rem; letter-spacing: 0.08em; white-space: nowrap; }
+      /* hide 囍 background pattern on mobile */
+      #travel { background-image: none; }
     }
 
     @media (max-width: 500px) {
@@ -1083,7 +1085,7 @@
 
   // ── String lights ────────────────────────────────────────────────────────
   (function () {
-    const H = 100;
+    const H = 140;
     const canvas = document.createElement('canvas');
     canvas.id = 'string-lights';
     Object.assign(canvas.style, {
@@ -1109,63 +1111,69 @@
       scrollVel = dy;
     }, { passive: true });
 
-    const SEGS   = 13;   // number of drooping segments
-    const TOP    = 2;    // attachment y
-    const CP_DROP = 118; // bezier control-point offset; visual droop ≈ CP_DROP/2 ≈ 59px
+    // 3 big sweeping droops, each carrying 6 bulbs along the wire
+    const SEGS    = 3;
+    const TOP     = 2;
+    const CP_DROP = 220;  // control-point offset; visual droop at midpoint ≈ 110px
+    const BULB_T  = [0.10, 0.24, 0.38, 0.52, 0.66, 0.80, 0.90]; // t positions per seg
+
+    // Quadratic bezier point at parameter t
+    function bez(t, x0, y0, cpx, cpy, x1, y1) {
+      const mt = 1 - t;
+      return {
+        x: mt*mt*x0 + 2*mt*t*cpx + t*t*x1,
+        y: mt*mt*y0 + 2*mt*t*cpy + t*t*y1
+      };
+    }
 
     function draw(ts) {
-      // Scroll-inertia sway
       inertia += (scrollVel * 0.38 - inertia) * 0.11;
       scrollVel *= 0.78;
-      const naturalSway = Math.sin(ts / 2700) * 2.2;
+      const naturalSway = Math.sin(ts / 2700) * 2.5;
       const sway = naturalSway + inertia;
 
       ctx.clearRect(0, 0, W, H);
 
-      // Wire
-      ctx.beginPath();
-      ctx.moveTo(0, TOP);
       for (let i = 0; i < SEGS; i++) {
         const x0  = (i / SEGS) * W;
         const x1  = ((i + 1) / SEGS) * W;
         const cpx = (x0 + x1) / 2 + sway;
         const cpy = TOP + CP_DROP;
+
+        // Wire
+        ctx.beginPath();
+        ctx.moveTo(x0, TOP);
         ctx.quadraticCurveTo(cpx, cpy, x1, TOP);
-      }
-      ctx.strokeStyle = 'rgba(60, 32, 10, 0.50)';
-      ctx.lineWidth = 1.1;
-      ctx.stroke();
+        ctx.strokeStyle = 'rgba(60, 32, 10, 0.50)';
+        ctx.lineWidth = 1.1;
+        ctx.stroke();
 
-      // Bulbs — placed at the bezier midpoint (t=0.5): B = 0.25*P0 + 0.5*CP + 0.25*P1
-      for (let i = 0; i < SEGS; i++) {
-        const x0  = (i / SEGS) * W;
-        const x1  = ((i + 1) / SEGS) * W;
-        const cpx = (x0 + x1) / 2 + sway;
-        const cpy = TOP + CP_DROP;
-        const bx  = 0.25 * x0 + 0.5 * cpx + 0.25 * x1;
-        const by  = 0.5 * TOP + 0.5 * cpy;   // ≈ TOP + CP_DROP/2
+        // Bulbs distributed along the wire
+        for (const t of BULB_T) {
+          const { x: bx, y: by } = bez(t, x0, TOP, cpx, cpy, x1, TOP);
 
-        // Outer glow — amber/neon-red palette
-        const g = ctx.createRadialGradient(bx, by, 0, bx, by, 22);
-        g.addColorStop(0,   'rgba(255,185,70,0.90)');
-        g.addColorStop(0.28,'rgba(255,110,56,0.55)');
-        g.addColorStop(1,   'rgba(255,80,40,0)');
-        ctx.beginPath();
-        ctx.arc(bx, by, 22, 0, Math.PI * 2);
-        ctx.fillStyle = g;
-        ctx.fill();
+          // Outer glow — amber/neon-red palette
+          const g = ctx.createRadialGradient(bx, by, 0, bx, by, 22);
+          g.addColorStop(0,    'rgba(255,185,70,0.90)');
+          g.addColorStop(0.28, 'rgba(255,110,56,0.55)');
+          g.addColorStop(1,    'rgba(255,80,40,0)');
+          ctx.beginPath();
+          ctx.arc(bx, by, 22, 0, Math.PI * 2);
+          ctx.fillStyle = g;
+          ctx.fill();
 
-        // Bulb body
-        ctx.beginPath();
-        ctx.arc(bx, by, 5, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffe07a';
-        ctx.fill();
+          // Bulb body
+          ctx.beginPath();
+          ctx.arc(bx, by, 5, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffe07a';
+          ctx.fill();
 
-        // Bright specular
-        ctx.beginPath();
-        ctx.arc(bx - 1.6, by - 1.6, 1.8, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,215,0.88)';
-        ctx.fill();
+          // Specular highlight
+          ctx.beginPath();
+          ctx.arc(bx - 1.6, by - 1.6, 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,215,0.88)';
+          ctx.fill();
+        }
       }
 
       requestAnimationFrame(draw);
