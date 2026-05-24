@@ -1116,14 +1116,10 @@
     // Curtain-open layout: control points far left/right, side-wall anchors for organic crossings.
     // Crossing strings start lower on the wall and end toward centre for more dramatic angle.
     const STRINGS = [
-      // Left curtain: deep left-side droop, flat on the right
-      { x0F: 0,    y0: 2,   x1F: 1,    y1: 2,   cpxF: 0.05, cpy: 305, n: 12 },
-      // Right curtain: mirror
-      { x0F: 0,    y0: 2,   x1F: 1,    y1: 2,   cpxF: 0.95, cpy: 305, n: 12 },
-      // Left-wall (low) → centre-top: steeper curtain angle
-      { x0F: 0,    y0: 152, x1F: 0.56, y1: 3,   cpxF: 0.18, cpy: 248, n: 10 },
-      // Centre-top → right-wall (low): mirror
-      { x0F: 0.44, y0: 3,   x1F: 1,    y1: 152, cpxF: 0.82, cpy: 248, n: 10 },
+      // Left curtain: full width, symmetric droop on left side
+      { x0F: 0, y0: 2, x1F: 1, y1: 2, cpxF: 0.95, cpy: 305, n: 19 },
+      // Right string: right anchor lower on right wall, left end stops at ~60% width
+      { x0F: 0, y0: 75, x1F: 0.60, y1: 2, cpxF: 0.05, cpy: 305, n: 14 },
     ];
 
     function bez(t, x0, y0, cpx, cpy, x1, y1) {
@@ -1187,12 +1183,12 @@
           // Organic dispersive glow — blurred layers, amber-red palette
           ctx.save();
           ctx.filter = 'blur(9px)';
-          ctx.fillStyle = 'rgba(255,110,86,0.72)';
+          ctx.fillStyle = 'rgba(255,160,70,0.72)';
           ctx.beginPath();
           ctx.arc(bx, by, 12, 0, Math.PI * 2);
           ctx.fill();
           ctx.filter = 'blur(20px)';
-          ctx.fillStyle = 'rgba(232,85,64,0.45)';
+          ctx.fillStyle = 'rgba(232,110,50,0.45)';
           ctx.beginPath();
           ctx.arc(bx, by, 8, 0, Math.PI * 2);
           ctx.fill();
@@ -1200,9 +1196,9 @@
 
           // Bulb body — bright centre fading to neon salmon-red
           const bulbG = ctx.createRadialGradient(bx, by, 0, bx, by, 4.5);
-          bulbG.addColorStop(0,   '#fff4ee');
-          bulbG.addColorStop(0.45,'#ffaa80');
-          bulbG.addColorStop(1,   '#ff6e56');
+          bulbG.addColorStop(0,   '#fffde0');
+          bulbG.addColorStop(0.45,'#ffd080');
+          bulbG.addColorStop(1,   '#ff8844');
           ctx.beginPath();
           ctx.arc(bx, by, 4.5, 0, Math.PI * 2);
           ctx.fillStyle = bulbG;
