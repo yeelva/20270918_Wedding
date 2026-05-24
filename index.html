@@ -1159,9 +1159,9 @@
         clearTimeout(hoverTimer);
         hoverTimer = setTimeout(() => {
           const target = Math.max(0, tile.offsetLeft + tile.offsetWidth / 2 - carousel.offsetWidth / 2);
-          // Duration scales with distance — min 800ms, ~1.2ms per px for far tiles
+          // 350ms for nearby, 450ms for far right
           const distance = Math.abs(target - carousel.scrollLeft);
-          const duration = Math.min(2200, Math.max(800, distance * 1.2));
+          const duration = Math.min(450, Math.max(350, 350 + distance * 0.02));
           // Lock center so scroll events don't flicker it during animation
           clearTimeout(centerLockTimer);
           centerLocked = true;
