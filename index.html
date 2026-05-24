@@ -116,7 +116,7 @@
 
     #hero {
       background-color: var(--sign-bg);
-      background-image: linear-gradient(to bottom, rgba(15,20,28,0.78) 0%, rgba(10,14,20,0.93) 100%), url('images/venue.jpg');
+      background-image: linear-gradient(to bottom, rgba(28,32,30,0.68) 0%, rgba(28,32,30,0.88) 100%), url('images/venue.jpg');
       background-size: cover;
       background-position: center 70%;
       display: flex;
@@ -1153,7 +1153,7 @@
     const FLICKER = STRINGS.map(s => Array.from({ length: s.n }, () => ({
       phase: Math.random() * Math.PI * 2,          // random start position in cycle
       freq:  0.0018 + Math.random() * 0.0028,      // noticeable variation speed
-      amp:   0.22  + Math.random() * 0.20,         // 22–42% brightness swing
+      amp:   0.32  + Math.random() * 0.30,         // 32–62% brightness swing
     })));
 
     // Per-bulb pendulum sway — each bulb hangs and swings at its own rate
@@ -1198,7 +1198,7 @@
       inertia = Math.max(-10, Math.min(10, inertia));
       scrollVel *= 0.55;
       // Two-frequency sway for organic back-and-forth motion
-      const naturalSway = Math.sin(ts / 1800) * 14 + Math.sin(ts / 3300) * 6;
+      const naturalSway = Math.sin(ts / 1800) * 22 + Math.sin(ts / 3300) * 10;
       const sway = naturalSway + inertia;
 
       ctx.clearRect(0, 0, W, H);
@@ -1240,11 +1240,16 @@
           // Flicker alpha
           const fp = FLICKER[si][bi];
           const alpha = 1.0 - fp.amp * (0.5 + 0.5 * Math.sin(ts * fp.freq + fp.phase));
-          ctx.globalAlpha = alpha * 0.85;
-          // Main glow
+          // Base glow — always-on floor so even dimmest flicker stays luminous
+          ctx.globalAlpha = 0.45;
           ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
+          // Flickering glow — drawn twice for punch
+          ctx.globalAlpha = alpha * 0.9;
+          ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
+          ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
+          // Bulb core — drawn twice for brighter centre
           ctx.globalAlpha = alpha;
-          // Bulb core
+          ctx.drawImage(bulbSprite, bxFinal - bsc, (by + hang) - bsc);
           ctx.drawImage(bulbSprite, bxFinal - bsc, (by + hang) - bsc);
         });
         ctx.globalAlpha = 1.0;
