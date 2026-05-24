@@ -1220,7 +1220,7 @@
 
         // Bulbs — hang below wire point so wire meets top of bulb, not centre
         const gw = SR * 5, gh = SR * 1.4;
-        const hang = BR + 3; // wire connects at top edge of bulb
+        const hang = BR - 3; // wire slightly overlaps top of bulb so they look connected
         posCache[si].forEach((pos, bi) => {
           const { x: bx, y: by } = pos;
           if (by < 0 || by > H) return;
