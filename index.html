@@ -1156,6 +1156,13 @@
       amp:   0.22  + Math.random() * 0.20,         // 22–42% brightness swing
     })));
 
+    // Per-bulb pendulum sway — each bulb hangs and swings at its own rate
+    const SWAY = STRINGS.map(s => Array.from({ length: s.n }, () => ({
+      phase: Math.random() * Math.PI * 2,
+      freq:  0.0003 + Math.random() * 0.0006,
+      amp:   1.2 + Math.random() * 2.5,
+    })));
+
     function bez(t, x0, y0, cpx, cpy, x1, y1) {
       const mt = 1 - t;
       return { x: mt*mt*x0 + 2*mt*t*cpx + t*t*x1, y: mt*mt*y0 + 2*mt*t*cpy + t*t*y1 };
@@ -1190,7 +1197,8 @@
       inertia *= 0.88;
       inertia = Math.max(-10, Math.min(10, inertia));
       scrollVel *= 0.55;
-      const naturalSway = Math.sin(ts / 2700) * 2.5;
+      // Two-frequency sway for organic back-and-forth motion
+      const naturalSway = Math.sin(ts / 1800) * 7 + Math.sin(ts / 3300) * 3;
       const sway = naturalSway + inertia;
 
       ctx.clearRect(0, 0, W, H);
@@ -1210,25 +1218,34 @@
         const s = STRINGS[si];
         const x0 = s.x0F * W, x1 = s.x1F * W, cpx = s.cpxF * W + sway;
 
-        // Wire
+        // Wire — slightly thicker, warmer neutral tone
         ctx.beginPath();
         ctx.moveTo(x0, s.y0);
         ctx.quadraticCurveTo(cpx, s.cpy, x1, s.y1);
-        ctx.strokeStyle = 'rgba(230,175,155,0.38)';
-        ctx.lineWidth = 0.7;
+        ctx.strokeStyle = 'rgba(165,135,115,0.50)';
+        ctx.lineWidth = 1.0;
         ctx.stroke();
 
-        // Bulbs — hang below wire point so wire meets top of bulb, not centre
-        const gw = SR * 5, gh = SR * 1.4;
-        const hang = BR - 3; // wire slightly overlaps top of bulb so they look connected
+        // Bulbs — hang below wire, with per-bulb pendulum offset + flicker
+        const gw = SR * 3.5, gh = SR * 2.0; // less extreme ellipse, more natural
+        const hang = BR - 3;
         posCache[si].forEach((pos, bi) => {
           const { x: bx, y: by } = pos;
           if (by < 0 || by > H) return;
+
+          // Per-bulb pendulum sway
+          const sw = SWAY[si][bi];
+          const bxFinal = bx + Math.sin(ts * sw.freq + sw.phase) * sw.amp;
+
+          // Flicker alpha
           const fp = FLICKER[si][bi];
           const alpha = 1.0 - fp.amp * (0.5 + 0.5 * Math.sin(ts * fp.freq + fp.phase));
+          ctx.globalAlpha = alpha * 0.85;
+          // Main glow
+          ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
           ctx.globalAlpha = alpha;
-          ctx.drawImage(glowSprite, bx - gw/2, (by + hang) - gh/2, gw, gh);
-          ctx.drawImage(bulbSprite, bx - bsc, (by + hang) - bsc);
+          // Bulb core
+          ctx.drawImage(bulbSprite, bxFinal - bsc, (by + hang) - bsc);
         });
         ctx.globalAlpha = 1.0;
       }
