@@ -1242,7 +1242,7 @@
 
     // All sizing is dynamic — recomputed on resize when scale changes
     let W, H;
-    let SR, BR, bsc, glowSprite, bulbSprite, gw, gh, hang, swayAmpScale;
+    let SR, BR, bsc, glowSprite, bulbSprite, gw, gh, hang, swayAmpScale, useDirect, glowR;
     let STRINGS, FLICKER, SWAY;
     let lastSc = -1, lastScrollY = 0, scrollVel = 0, inertia = 0;
     let lastSway = null, posCache = [];
@@ -1259,8 +1259,10 @@
       SR           = 200;
       BR           = Math.max(4, Math.round(7 * Math.max(sc, 0.55)));
       bsc          = BR + 1;
-      // On mobile the glow needs a much larger footprint to be clearly visible
       const isMobile = sc < 0.8;
+      // Mobile uses direct radial gradients (no sprite) — avoids scaling artifacts
+      useDirect = isMobile;
+      glowR     = isMobile ? Math.round(W * 0.15) : 0; // ~58 px on 390 px screen
       gw = Math.round(W * (isMobile ? 0.62 : 0.34));
       gh = Math.round(W * (isMobile ? 0.40 : 0.21));
       hang         = Math.max(0, BR - 3);
@@ -1289,13 +1291,13 @@
       bulbSprite.width = BR * 2 + 2; bulbSprite.height = BR * 2 + 2;
       const bc = bulbSprite.getContext('2d');
       const bulbG = bc.createRadialGradient(bsc, bsc, 0, bsc, bsc, BR);
-      bulbG.addColorStop(0,    '#fffde8');
-      bulbG.addColorStop(0.12, '#ffecb8');
-      bulbG.addColorStop(0.28, '#ffd898');
-      bulbG.addColorStop(0.46, '#ffbc78');
-      bulbG.addColorStop(0.64, '#ffa060');
-      bulbG.addColorStop(0.82, '#ff8248');
-      bulbG.addColorStop(1,    'rgba(255,100,55,0)');
+      bulbG.addColorStop(0,    '#fffef4');
+      bulbG.addColorStop(0.12, '#fff5d5');
+      bulbG.addColorStop(0.28, '#ffe8b0');
+      bulbG.addColorStop(0.46, '#ffd090');
+      bulbG.addColorStop(0.64, '#ffb872');
+      bulbG.addColorStop(0.82, '#ffa05c');
+      bulbG.addColorStop(1,    'rgba(255,130,75,0)');
       bc.beginPath(); bc.arc(bsc, bsc, BR, 0, Math.PI * 2);
       bc.fillStyle = bulbG; bc.fill();
 
@@ -1414,18 +1416,41 @@
 
           const fp = FLICKER[si][bi];
           const alpha = 1.0 - fp.amp * (0.5 + 0.5 * Math.sin(ts * fp.freq + fp.phase));
-          // Base glow floor — drawn twice so the halo is clearly visible
-          ctx.globalAlpha = 0.68;
-          ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
-          ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
-          // Flickering glow — drawn twice for animated punch
-          ctx.globalAlpha = alpha * 0.95;
-          ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
-          ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
-          // Bulb core — drawn twice for brighter centre
-          ctx.globalAlpha = alpha;
-          ctx.drawImage(bulbSprite, bxFinal - bsc, (by + hang) - bsc);
-          ctx.drawImage(bulbSprite, bxFinal - bsc, (by + hang) - bsc);
+
+          if (useDirect) {
+            // ── Mobile: per-bulb radial gradient — no sprite scaling artifacts ──
+            ctx.globalAlpha = 1;
+            const cy = by + hang;
+            // Wide ambient floor — always-on warmth, larger radius
+            const gr0 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR * 1.7);
+            gr0.addColorStop(0,    'rgba(255,215,125,0.34)');
+            gr0.addColorStop(0.45, 'rgba(255,168,60,0.16)');
+            gr0.addColorStop(1,    'rgba(255,110,30,0)');
+            ctx.fillStyle = gr0;
+            ctx.beginPath(); ctx.arc(bxFinal, cy, glowR * 1.7, 0, Math.PI * 2); ctx.fill();
+            // Flickering inner glow
+            const gr1 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR);
+            gr1.addColorStop(0,    `rgba(255,238,170,${(alpha * 0.92).toFixed(3)})`);
+            gr1.addColorStop(0.30, `rgba(255,192,88,${(alpha * 0.56).toFixed(3)})`);
+            gr1.addColorStop(0.65, `rgba(255,148,45,${(alpha * 0.22).toFixed(3)})`);
+            gr1.addColorStop(1,    'rgba(255,100,25,0)');
+            ctx.fillStyle = gr1;
+            ctx.beginPath(); ctx.arc(bxFinal, cy, glowR, 0, Math.PI * 2); ctx.fill();
+            // Bulb core
+            ctx.globalAlpha = Math.min(1, alpha * 1.1);
+            ctx.drawImage(bulbSprite, bxFinal - bsc, cy - bsc);
+          } else {
+            // ── Desktop: pre-rendered sprite ──
+            ctx.globalAlpha = 0.68;
+            ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
+            ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
+            ctx.globalAlpha = alpha * 0.95;
+            ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
+            ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
+            ctx.globalAlpha = alpha;
+            ctx.drawImage(bulbSprite, bxFinal - bsc, (by + hang) - bsc);
+            ctx.drawImage(bulbSprite, bxFinal - bsc, (by + hang) - bsc);
+          }
         });
         ctx.globalAlpha = 1.0;
       }
