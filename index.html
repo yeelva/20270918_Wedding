@@ -796,91 +796,95 @@
       background-image: url('images/entrance.jpg');
       background-size: cover;
       background-position: center 30%;
-      transform: scale(1.04);
+      transform: scale(1.14);
       transition: transform 8s ease-out;
     }
     #env-screen.loaded .splash-bg {
       transform: scale(1);
     }
-    /* Gradient overlay — dark at bottom, lighter at top to let gate shine */
+    /* Gradient overlay — slightly darker at top where text sits, fades mid */
     .splash-bg::after {
       content: '';
       position: absolute;
       inset: 0;
       background:
         linear-gradient(to bottom,
-          rgba(10,8,6,0.18) 0%,
-          rgba(10,8,6,0.10) 35%,
-          rgba(10,8,6,0.38) 70%,
-          rgba(10,8,6,0.72) 100%
+          rgba(10,8,6,0.40) 0%,
+          rgba(10,8,6,0.22) 30%,
+          rgba(10,8,6,0.08) 55%,
+          rgba(10,8,6,0.30) 100%
         );
     }
 
-    /* ── Content centred on screen ── */
+    /* ── Content — positioned in upper portion, above the gate sign ── */
     .splash-content {
-      position: relative;
+      position: absolute;
       z-index: 2;
+      top: 13%;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(10px, 2.5vh, 28px);
+      gap: clamp(8px, 1.8vh, 22px);
       text-align: center;
       padding: 0 24px;
-      /* push toward lower third where overlay is darker */
-      margin-top: 28vh;
-    }
-
-    .splash-hanzi {
-      font-family: 'Noto Serif SC', serif;
-      font-size: clamp(1.4rem, 3vw, 2.2rem);
-      color: rgba(255,235,210,0.75);
-      letter-spacing: 0.18em;
-      line-height: 1;
+      width: 100%;
     }
 
     .splash-names {
       font-family: 'Playfair Display', serif;
       font-style: italic;
+      font-weight: 700;
       font-size: clamp(2rem, 5.5vw, 4.2rem);
-      color: rgba(210, 105, 80, 0.95);
+      color: rgba(215, 105, 80, 0.97);
       line-height: 1.1;
       letter-spacing: 0.01em;
-      text-shadow: 0 2px 28px rgba(0,0,0,0.5);
+      text-shadow:
+        0 0 18px rgba(210, 100, 75, 0.55),
+        0 0 40px rgba(200, 85, 60, 0.30),
+        0 2px 16px rgba(0,0,0,0.45);
     }
 
     .splash-date {
       font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
+      font-weight: 500;
       font-size: clamp(0.7rem, 1.4vw, 1rem);
-      color: rgba(200, 95, 72, 0.78);
+      color: rgba(205, 98, 75, 0.92);
       letter-spacing: 0.28em;
       text-transform: uppercase;
+      text-shadow:
+        0 0 14px rgba(210, 100, 75, 0.45),
+        0 0 30px rgba(200, 80, 55, 0.22);
     }
 
-    /* ── Enter button ── */
+    /* ── Enter button — overlays the "NO DOGS" sign on the gate ── */
+    /* Position is set dynamically by JS to account for cover-scaling across viewports */
     .splash-enter {
-      margin-top: clamp(8px, 2vh, 20px);
-      padding: 14px 44px;
-      border: 1px solid rgba(210,105,80,0.5);
-      background: transparent;
-      color: rgba(210, 105, 80, 0.88);
+      position: absolute;
+      left: 50%;
+      top: 76%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      padding: 5px 18px;
+      border: 1px solid rgba(255,255,255,0.55);
+      background: rgba(28, 18, 10, 0.82);
+      color: rgba(255, 255, 255, 0.90);
       font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      font-size: clamp(0.7rem, 1.2vw, 0.88rem);
-      letter-spacing: 0.24em;
+      font-weight: 400;
+      font-size: clamp(0.55rem, 0.85vw, 0.7rem);
+      letter-spacing: 0.26em;
       text-transform: uppercase;
       cursor: pointer;
       transition:
         background 0.3s ease,
         border-color 0.3s ease,
         color 0.3s ease;
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
     }
     .splash-enter:hover {
-      background: rgba(210,105,80,0.12);
-      border-color: rgba(210,105,80,0.85);
-      color: rgba(220, 115, 88, 1);
+      background: rgba(28, 18, 10, 0.92);
+      border-color: rgba(255,255,255,0.9);
+      color: #fff;
     }
 
   </style>
@@ -891,10 +895,7 @@
      ENVELOPE ENTRANCE SCREEN
 ═══════════════════════════════════ -->
 <div id="env-screen">
-  <div class="splash-bg"></div>
-  <div class="splash-content">
-    <div class="splash-names">Ian &amp; Elva</div>
-    <div class="splash-date">September 18, 2027 &nbsp;·&nbsp; Mill Valley, CA</div>
+  <div class="splash-bg">
     <button class="splash-enter" id="splashEnter">Enter</button>
   </div>
 </div>
@@ -1547,6 +1548,35 @@
   const screen = document.getElementById('env-screen');
   const btn    = document.getElementById('splashEnter');
   if (!screen) return;
+
+  // ── Position ENTER button exactly over the "NO DOGS" sign ──
+  // The sign lives at these fractions of the original 2500×1669 image:
+  const IMG_W   = 2500, IMG_H = 1669;
+  const SIGN_NX = 0.499;  // horizontal centre of sign (≈ centred)
+  const SIGN_NY = 0.728;  // vertical centre of sign
+  const BG_POS_X = 0.5;   // background-position: center  (50%)
+  const BG_POS_Y = 0.30;  // background-position: 30%
+
+  function positionBtn() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    // background-size: cover scale factor
+    const scale = Math.max(vw / IMG_W, vh / IMG_H);
+    const rendW = IMG_W * scale;
+    const rendH = IMG_H * scale;
+    // pixel offset of the rendered image inside the viewport
+    const offX = (vw - rendW) * BG_POS_X;
+    const offY = (vh - rendH) * BG_POS_Y;
+    // screen coordinates of the sign centre
+    const sx = SIGN_NX * rendW + offX;
+    const sy = SIGN_NY * rendH + offY;
+    btn.style.left      = sx + 'px';
+    btn.style.top       = sy + 'px';
+    btn.style.transform = 'translate(-50%, -50%)';
+  }
+
+  positionBtn();
+  window.addEventListener('resize', positionBtn);
 
   // Trigger subtle Ken Burns zoom-out on load
   requestAnimationFrame(() => screen.classList.add('loaded'));
