@@ -1245,29 +1245,31 @@
 
     // ── Rebuild sprites & string definitions whenever viewport scale shifts ──
     function buildSprites(sc) {
-      // Visual scale uses a gentler floor so glows don't vanish on narrow screens
-      const vsc = Math.max(0.44, sc);
-      SR          = Math.round(90  * vsc);
-      BR          = Math.max(4, Math.round(7 * vsc));
-      bsc         = BR + 1;
-      gw          = SR * 3.5;
-      gh          = SR * 2.0;
-      hang        = Math.max(0, BR - 3);
-      swayAmpScale = sc; // natural wire sway scales with canvas width
+      // Glow sprite is always rendered at full desktop quality (SR fixed at 90).
+      // Scaling SR down clips the blur falloff, killing the diffusion on mobile.
+      // Instead we scale only the *draw size* (gw/gh) to stay proportional to
+      // the viewport, so the glow looks the same relative to screen width.
+      SR           = 90;
+      BR           = Math.max(4, Math.round(7 * Math.max(sc, 0.55)));
+      bsc          = BR + 1;
+      gw           = Math.round(W * 0.246); // 24.6 % of viewport ≈ SR*3.5 at 1280px
+      gh           = Math.round(W * 0.141); // 14.1 % of viewport ≈ SR*2.0 at 1280px
+      hang         = Math.max(0, BR - 3);
+      swayAmpScale = sc;
 
-      // Glow sprite
+      // Glow sprite — identical blurs/arcs as desktop; quality does not degrade
       glowSprite = document.createElement('canvas');
       glowSprite.width = SR * 2; glowSprite.height = SR * 2;
       const gc = glowSprite.getContext('2d');
-      gc.filter = `blur(${Math.max(5,  Math.round(16 * vsc))}px)`;
+      gc.filter = 'blur(16px)';
       gc.fillStyle = 'rgba(255,125,65,0.78)';
-      gc.beginPath(); gc.arc(SR, SR, Math.max(4, Math.round(10 * vsc)), 0, Math.PI * 2); gc.fill();
-      gc.filter = `blur(${Math.max(16, Math.round(48 * vsc))}px)`;
+      gc.beginPath(); gc.arc(SR, SR, 10, 0, Math.PI * 2); gc.fill();
+      gc.filter = 'blur(48px)';
       gc.fillStyle = 'rgba(232,88,48,0.54)';
-      gc.beginPath(); gc.arc(SR, SR, Math.max(3, Math.round( 8 * vsc)), 0, Math.PI * 2); gc.fill();
-      gc.filter = `blur(${Math.max(26, Math.round(80 * vsc))}px)`;
+      gc.beginPath(); gc.arc(SR, SR, 8,  0, Math.PI * 2); gc.fill();
+      gc.filter = 'blur(80px)';
       gc.fillStyle = 'rgba(255,100,50,0.30)';
-      gc.beginPath(); gc.arc(SR, SR, Math.max(3, Math.round( 6 * vsc)), 0, Math.PI * 2); gc.fill();
+      gc.beginPath(); gc.arc(SR, SR, 6,  0, Math.PI * 2); gc.fill();
 
       // Bulb sprite
       bulbSprite = document.createElement('canvas');
@@ -1285,12 +1287,15 @@
       bc.fillStyle = bulbG; bc.fill();
 
       // String geometry — y values and droop scale with canvas height;
-      // bulb count scales with canvas width so spacing stays consistent
-      const hsc = H / 290;
+      // bulb count scales with canvas width so spacing stays consistent.
+      // On narrow screens add 15 % extra droop depth so the catenary is
+      // clearly visible rather than just peeking into frame.
+      const hsc     = H / 290;
+      const droopSc = sc < 0.8 ? 1.15 : 1.0;
       STRINGS = [
-        { x0F: 0,    y0: Math.round(  2*hsc), x1F: 1,    y1: Math.round(  2*hsc), cpxF: 0.95, cpy: Math.round(305*hsc), n: Math.max(4, Math.round(19*sc)) },
-        { x0F: 0,    y0: Math.round( 75*hsc), x1F: 0.60, y1: Math.round(  2*hsc), cpxF: 0.05, cpy: Math.round(305*hsc), n: Math.max(3, Math.round(14*sc)) },
-        { x0F: 0.57, y0: Math.round( 60*hsc), x1F: 1.00, y1: Math.round(185*hsc), cpxF: 0.77, cpy: Math.round(210*hsc), n: Math.max(3, Math.round( 9*sc)) },
+        { x0F: 0,    y0: Math.round(  2*hsc), x1F: 1,    y1: Math.round(  2*hsc), cpxF: 0.95, cpy: Math.round(305*hsc*droopSc), n: Math.max(4, Math.round(19*sc)) },
+        { x0F: 0,    y0: Math.round( 75*hsc), x1F: 0.60, y1: Math.round(  2*hsc), cpxF: 0.05, cpy: Math.round(305*hsc*droopSc), n: Math.max(3, Math.round(14*sc)) },
+        { x0F: 0.57, y0: Math.round( 60*hsc), x1F: 1.00, y1: Math.round(185*hsc), cpxF: 0.77, cpy: Math.round(210*hsc*droopSc), n: Math.max(3, Math.round( 9*sc)) },
       ];
 
       // Per-bulb flicker — each bulb gets its own phase, speed, depth
@@ -1312,8 +1317,8 @@
     function resize() {
       W = window.innerWidth;
       const sc = Math.min(1, W / BASE_W);
-      // Canvas height scales with width, floored so it stays usable on tiny screens
-      H = Math.max(150, Math.round(290 * Math.max(sc, 0.55)));
+      // Canvas height — tall enough that the catenary droop is clearly visible
+      H = Math.max(220, Math.round(290 * Math.max(sc, 0.76)));
       canvas.width  = W;
       canvas.height = H;
       canvas.style.height = H + 'px';
@@ -1364,16 +1369,14 @@
 
       ctx.clearRect(0, 0, W, H);
 
-      // Recompute bulb positions only when sway shifts enough to matter
-      const swayChanged = lastSway === null || Math.abs(sway - lastSway) > 0.4;
-      if (swayChanged) {
-        lastSway = sway;
-        STRINGS.forEach((s, si) => {
-          const x0 = s.x0F * W, x1 = s.x1F * W, cpx = s.cpxF * W + sway;
-          posCache[si] = evenTParams(x0, s.y0, cpx, s.cpy, x1, s.y1, s.n)
-            .map(t => bez(t, x0, s.y0, cpx, s.cpy, x1, s.y1));
-        });
-      }
+      // Always recompute positions every frame.
+      // The old 0.4 px threshold caused ~12 fps updates on mobile because the
+      // scaled-down sway amplitude barely moves per frame — making lights look frozen.
+      STRINGS.forEach((s, si) => {
+        const x0 = s.x0F * W, x1 = s.x1F * W, cpx = s.cpxF * W + sway;
+        posCache[si] = evenTParams(x0, s.y0, cpx, s.cpy, x1, s.y1, s.n)
+          .map(t => bez(t, x0, s.y0, cpx, s.cpy, x1, s.y1));
+      });
 
       for (let si = 0; si < STRINGS.length; si++) {
         const s = STRINGS[si];
