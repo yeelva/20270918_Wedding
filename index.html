@@ -1242,7 +1242,7 @@
 
     // All sizing is dynamic — recomputed on resize when scale changes
     let W, H;
-    let SR, BR, bsc, glowSprite, bulbSprite, gw, gh, hang, swayAmpScale, useDirect, glowR;
+    let SR, BR, bsc, glowSprite, bulbSprite, gw, gh, hang, swayAmpScale, useDirect, glowR, glowBright;
     let STRINGS, FLICKER, SWAY;
     let lastSc = -1, lastScrollY = 0, scrollVel = 0, inertia = 0;
     let lastSway = null, posCache = [];
@@ -1262,7 +1262,8 @@
       const isMobile = sc < 0.8;
       // Both mobile and desktop use direct radial gradients — consistent warm amber look
       useDirect = true;
-      glowR     = Math.round(W * (isMobile ? 0.08 : 0.024)); // ~31px mobile, ~35px desktop
+      glowR      = Math.round(W * (isMobile ? 0.08 : 0.024)); // ~31px mobile, ~35px desktop
+      glowBright = isMobile ? 1.7 : 1.0;
       gw = Math.round(W * (isMobile ? 0.62 : 0.34));
       gh = Math.round(W * (isMobile ? 0.40 : 0.21));
       hang         = Math.max(0, BR - 3);
@@ -1423,21 +1424,21 @@
             const cy = by + hang;
             // Wide ambient floor — always-on warmth
             const gr0 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR * 1.1);
-            gr0.addColorStop(0,    'rgba(255,198,88,0.07)');
-            gr0.addColorStop(0.45, 'rgba(255,152,42,0.03)');
+            gr0.addColorStop(0,    `rgba(255,198,88,${(0.07 * glowBright).toFixed(3)})`);
+            gr0.addColorStop(0.45, `rgba(255,152,42,${(0.03 * glowBright).toFixed(3)})`);
             gr0.addColorStop(1,    'rgba(255,110,30,0)');
             ctx.fillStyle = gr0;
             ctx.beginPath(); ctx.arc(bxFinal, cy, glowR * 1.1, 0, Math.PI * 2); ctx.fill();
             // Flickering inner glow
             const gr1 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR);
-            gr1.addColorStop(0,    `rgba(255,222,138,${(alpha * 0.34).toFixed(3)})`);
-            gr1.addColorStop(0.30, `rgba(255,175,62,${(alpha * 0.20).toFixed(3)})`);
-            gr1.addColorStop(0.65, `rgba(255,135,32,${(alpha * 0.07).toFixed(3)})`);
+            gr1.addColorStop(0,    `rgba(255,222,138,${(alpha * 0.34 * glowBright).toFixed(3)})`);
+            gr1.addColorStop(0.30, `rgba(255,175,62,${(alpha * 0.20 * glowBright).toFixed(3)})`);
+            gr1.addColorStop(0.65, `rgba(255,135,32,${(alpha * 0.07 * glowBright).toFixed(3)})`);
             gr1.addColorStop(1,    'rgba(255,100,25,0)');
             ctx.fillStyle = gr1;
             ctx.beginPath(); ctx.arc(bxFinal, cy, glowR, 0, Math.PI * 2); ctx.fill();
             // Bulb core
-            ctx.globalAlpha = Math.min(1, alpha * 0.75);
+            ctx.globalAlpha = Math.min(1, alpha * 0.75 * glowBright);
             ctx.drawImage(bulbSprite, bxFinal - bsc, cy - bsc);
           }
         });
