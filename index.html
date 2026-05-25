@@ -875,11 +875,11 @@
       transform: translate(-50%, -50%);
       z-index: 2;
       padding: 5px 18px;
-      border: 1px solid rgba(220, 80, 70, 0.75);
+      border: 1px solid rgba(255,255,255,0.55);
       background: rgba(28, 18, 10, 0.82);
-      color: rgba(255, 255, 255, 0.90);
-      box-shadow: 0 0 10px rgba(200,55,45,0.55), 0 0 26px rgba(180,40,35,0.30);
-      text-shadow: 0 0 8px rgba(230,80,70,0.70);
+      color: rgba(252, 238, 210, 0.92);
+      box-shadow: 0 0 10px rgba(245,210,140,0.35), 0 0 22px rgba(235,190,110,0.18);
+      text-shadow: 0 0 7px rgba(248,218,155,0.60);
       font-family: 'DM Sans', sans-serif;
       font-weight: 400;
       font-size: clamp(0.55rem, 0.85vw, 0.7rem);
@@ -893,10 +893,10 @@
     }
     .splash-enter:hover {
       background: rgba(28, 18, 10, 0.92);
-      border-color: rgba(230, 90, 80, 0.95);
+      border-color: rgba(255,255,255,0.85);
       color: #fff;
-      box-shadow: 0 0 14px rgba(200,55,45,0.80), 0 0 36px rgba(180,40,35,0.45);
-      text-shadow: 0 0 10px rgba(230,80,70,0.90);
+      box-shadow: 0 0 14px rgba(245,210,140,0.55), 0 0 30px rgba(235,190,110,0.28);
+      text-shadow: 0 0 9px rgba(248,218,155,0.80);
     }
 
   </style>
@@ -1305,7 +1305,7 @@
       // clearly visible rather than just peeking into frame.
       const hsc     = H / 290;
       const droopSc = sc < 0.8 ? 1.15 : 1.0;
-      const deskAdj = sc >= 0.8 ? -2 : 0; // remove 2 bulbs per string on desktop only
+      const deskAdj = sc >= 0.8 ? -3 : 0; // remove 3 bulbs per string on desktop only
       STRINGS = [
         { x0F: 0,    y0: Math.round(  2*hsc), x1F: 1,    y1: Math.round(  2*hsc), cpxF: 0.95, cpy: Math.round(305*hsc*droopSc), n: Math.max(4, Math.round(19*sc) + deskAdj) },
         { x0F: 0,    y0: Math.round( 75*hsc), x1F: 0.60, y1: Math.round(  2*hsc), cpxF: 0.05, cpy: Math.round(305*hsc*droopSc), n: Math.max(3, Math.round(14*sc) + deskAdj) },
