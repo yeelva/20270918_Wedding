@@ -1260,9 +1260,9 @@
       BR           = Math.max(4, Math.round(7 * Math.max(sc, 0.55)));
       bsc          = BR + 1;
       const isMobile = sc < 0.8;
-      // Mobile uses direct radial gradients (no sprite) — avoids scaling artifacts
-      useDirect = isMobile;
-      glowR     = isMobile ? Math.round(W * 0.15) : 0; // ~58 px on 390 px screen
+      // Both mobile and desktop use direct radial gradients — consistent warm amber look
+      useDirect = true;
+      glowR     = Math.round(W * (isMobile ? 0.15 : 0.055)); // ~58px mobile, ~80px desktop
       gw = Math.round(W * (isMobile ? 0.62 : 0.34));
       gh = Math.round(W * (isMobile ? 0.40 : 0.21));
       hang         = Math.max(0, BR - 3);
@@ -1417,11 +1417,11 @@
           const fp = FLICKER[si][bi];
           const alpha = 1.0 - fp.amp * (0.5 + 0.5 * Math.sin(ts * fp.freq + fp.phase));
 
-          if (useDirect) {
-            // ── Mobile: per-bulb radial gradient — no sprite scaling artifacts ──
+          {
+            // ── Per-bulb radial gradient — consistent warm amber look on all viewports ──
             ctx.globalAlpha = 1;
             const cy = by + hang;
-            // Wide ambient floor — always-on warmth, larger radius
+            // Wide ambient floor — always-on warmth
             const gr0 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR * 1.1);
             gr0.addColorStop(0,    'rgba(255,198,88,0.14)');
             gr0.addColorStop(0.45, 'rgba(255,152,42,0.06)');
@@ -1439,17 +1439,6 @@
             // Bulb core
             ctx.globalAlpha = Math.min(1, alpha * 0.9);
             ctx.drawImage(bulbSprite, bxFinal - bsc, cy - bsc);
-          } else {
-            // ── Desktop: pre-rendered sprite ──
-            ctx.globalAlpha = 0.68;
-            ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
-            ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
-            ctx.globalAlpha = alpha * 0.95;
-            ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
-            ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
-            ctx.globalAlpha = alpha;
-            ctx.drawImage(bulbSprite, bxFinal - bsc, (by + hang) - bsc);
-            ctx.drawImage(bulbSprite, bxFinal - bsc, (by + hang) - bsc);
           }
         });
         ctx.globalAlpha = 1.0;
