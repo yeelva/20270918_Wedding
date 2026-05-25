@@ -1255,9 +1255,10 @@
       SR           = 200;
       BR           = Math.max(4, Math.round(7 * Math.max(sc, 0.55)));
       bsc          = BR + 1;
-      // Wider draw area so the soft halo has room to breathe on screen
-      gw           = Math.round(W * 0.34);
-      gh           = Math.round(W * 0.21);
+      // On mobile the glow needs a much larger footprint to be clearly visible
+      const isMobile = sc < 0.8;
+      gw = Math.round(W * (isMobile ? 0.62 : 0.34));
+      gh = Math.round(W * (isMobile ? 0.40 : 0.21));
       hang         = Math.max(0, BR - 3);
       swayAmpScale = sc;
 
