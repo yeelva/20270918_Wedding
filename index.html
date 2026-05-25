@@ -1262,7 +1262,7 @@
       const isMobile = sc < 0.8;
       // Both mobile and desktop use direct radial gradients — consistent warm amber look
       useDirect = true;
-      glowR     = Math.round(W * (isMobile ? 0.15 : 0.055)); // ~58px mobile, ~80px desktop
+      glowR     = Math.round(W * (isMobile ? 0.10 : 0.032)); // ~39px mobile, ~46px desktop
       gw = Math.round(W * (isMobile ? 0.62 : 0.34));
       gh = Math.round(W * (isMobile ? 0.40 : 0.21));
       hang         = Math.max(0, BR - 3);
@@ -1423,16 +1423,16 @@
             const cy = by + hang;
             // Wide ambient floor — always-on warmth
             const gr0 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR * 1.1);
-            gr0.addColorStop(0,    'rgba(255,198,88,0.14)');
-            gr0.addColorStop(0.45, 'rgba(255,152,42,0.06)');
+            gr0.addColorStop(0,    'rgba(255,198,88,0.10)');
+            gr0.addColorStop(0.45, 'rgba(255,152,42,0.04)');
             gr0.addColorStop(1,    'rgba(255,110,30,0)');
             ctx.fillStyle = gr0;
             ctx.beginPath(); ctx.arc(bxFinal, cy, glowR * 1.1, 0, Math.PI * 2); ctx.fill();
             // Flickering inner glow
             const gr1 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR);
-            gr1.addColorStop(0,    `rgba(255,222,138,${(alpha * 0.60).toFixed(3)})`);
-            gr1.addColorStop(0.30, `rgba(255,175,62,${(alpha * 0.36).toFixed(3)})`);
-            gr1.addColorStop(0.65, `rgba(255,135,32,${(alpha * 0.14).toFixed(3)})`);
+            gr1.addColorStop(0,    `rgba(255,222,138,${(alpha * 0.48).toFixed(3)})`);
+            gr1.addColorStop(0.30, `rgba(255,175,62,${(alpha * 0.28).toFixed(3)})`);
+            gr1.addColorStop(0.65, `rgba(255,135,32,${(alpha * 0.10).toFixed(3)})`);
             gr1.addColorStop(1,    'rgba(255,100,25,0)');
             ctx.fillStyle = gr1;
             ctx.beginPath(); ctx.arc(bxFinal, cy, glowR, 0, Math.PI * 2); ctx.fill();
