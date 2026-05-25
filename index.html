@@ -136,6 +136,7 @@
       text-align: center;
       max-width: 900px;
       width: 100%;
+      margin-top: 48px;
     }
 
     .neon-invite {
@@ -769,9 +770,134 @@
     #lb-next { right: 20px; }
     #lightbox-close { z-index: 1001; }
 
+
+    /* ═══════════════════════════════════════
+       SPLASH ENTRANCE SCREEN
+    ═══════════════════════════════════════ */
+    #env-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #1a1612;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      transition: opacity 1.2s ease;
+      overflow: hidden;
+    }
+    #env-screen.fade-out { opacity: 0; pointer-events: none; }
+
+    /* ── Background photo ── */
+    .splash-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('images/entrance.jpg');
+      background-size: cover;
+      background-position: center 30%;
+      transform: scale(1.04);
+      transition: transform 8s ease-out;
+    }
+    #env-screen.loaded .splash-bg {
+      transform: scale(1);
+    }
+    /* Gradient overlay — dark at bottom, lighter at top to let gate shine */
+    .splash-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom,
+          rgba(10,8,6,0.18) 0%,
+          rgba(10,8,6,0.10) 35%,
+          rgba(10,8,6,0.38) 70%,
+          rgba(10,8,6,0.72) 100%
+        );
+    }
+
+    /* ── Content centred on screen ── */
+    .splash-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(10px, 2.5vh, 28px);
+      text-align: center;
+      padding: 0 24px;
+      /* push toward lower third where overlay is darker */
+      margin-top: 28vh;
+    }
+
+    .splash-hanzi {
+      font-family: 'Noto Serif SC', serif;
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      color: rgba(255,235,210,0.75);
+      letter-spacing: 0.18em;
+      line-height: 1;
+    }
+
+    .splash-names {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(2rem, 5.5vw, 4.2rem);
+      color: rgba(210, 105, 80, 0.95);
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      text-shadow: 0 2px 28px rgba(0,0,0,0.5);
+    }
+
+    .splash-date {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: clamp(0.7rem, 1.4vw, 1rem);
+      color: rgba(200, 95, 72, 0.78);
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+    }
+
+    /* ── Enter button ── */
+    .splash-enter {
+      margin-top: clamp(8px, 2vh, 20px);
+      padding: 14px 44px;
+      border: 1px solid rgba(210,105,80,0.5);
+      background: transparent;
+      color: rgba(210, 105, 80, 0.88);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: clamp(0.7rem, 1.2vw, 0.88rem);
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition:
+        background 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    .splash-enter:hover {
+      background: rgba(210,105,80,0.12);
+      border-color: rgba(210,105,80,0.85);
+      color: rgba(220, 115, 88, 1);
+    }
+
   </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════
+     ENVELOPE ENTRANCE SCREEN
+═══════════════════════════════════ -->
+<div id="env-screen">
+  <div class="splash-bg"></div>
+  <div class="splash-content">
+    <div class="splash-names">Ian &amp; Elva</div>
+    <div class="splash-date">September 18, 2027 &nbsp;·&nbsp; Mill Valley, CA</div>
+    <button class="splash-enter" id="splashEnter">Enter</button>
+  </div>
+</div>
 
 <!-- NAV -->
 <nav>
@@ -1411,6 +1537,25 @@
       if (window._lbOpen) window._lbOpen(window._lbCurrentIndex + (dx < 0 ? 1 : -1));
     }, { passive: true });
   });
+</script>
+
+<script>
+/* ═══════════════════════════════════
+   SPLASH ENTRANCE INTERACTION
+═══════════════════════════════════ */
+(function () {
+  const screen = document.getElementById('env-screen');
+  const btn    = document.getElementById('splashEnter');
+  if (!screen) return;
+
+  // Trigger subtle Ken Burns zoom-out on load
+  requestAnimationFrame(() => screen.classList.add('loaded'));
+
+  btn.addEventListener('click', function () {
+    screen.classList.add('fade-out');
+    setTimeout(() => screen.remove(), 1300);
+  });
+})();
 </script>
 
 <div id="lightbox">
