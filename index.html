@@ -1249,15 +1249,19 @@
       // Scaling SR down clips the blur falloff, killing the diffusion on mobile.
       // Instead we scale only the *draw size* (gw/gh) to stay proportional to
       // the viewport, so the glow looks the same relative to screen width.
-      SR           = 90;
+      // SR=200 → sprite is 400×400 px.  With the widest blur (80 px) the glow
+      // intensity at the sprite edge falls to ~5 %, so the falloff is gradual
+      // rather than abruptly cut off.  (SR=90 left ~57 % at the edge.)
+      SR           = 200;
       BR           = Math.max(4, Math.round(7 * Math.max(sc, 0.55)));
       bsc          = BR + 1;
-      gw           = Math.round(W * 0.246); // 24.6 % of viewport ≈ SR*3.5 at 1280px
-      gh           = Math.round(W * 0.141); // 14.1 % of viewport ≈ SR*2.0 at 1280px
+      // Wider draw area so the soft halo has room to breathe on screen
+      gw           = Math.round(W * 0.34);
+      gh           = Math.round(W * 0.21);
       hang         = Math.max(0, BR - 3);
       swayAmpScale = sc;
 
-      // Glow sprite — identical blurs/arcs as desktop; quality does not degrade
+      // Glow sprite — four layers, outermost is a wide ultra-soft haze
       glowSprite = document.createElement('canvas');
       glowSprite.width = SR * 2; glowSprite.height = SR * 2;
       const gc = glowSprite.getContext('2d');
@@ -1270,6 +1274,10 @@
       gc.filter = 'blur(80px)';
       gc.fillStyle = 'rgba(255,100,50,0.30)';
       gc.beginPath(); gc.arc(SR, SR, 6,  0, Math.PI * 2); gc.fill();
+      // Wide haze layer — only possible because SR is large enough to contain it
+      gc.filter = 'blur(120px)';
+      gc.fillStyle = 'rgba(255,80,30,0.16)';
+      gc.beginPath(); gc.arc(SR, SR, 5,  0, Math.PI * 2); gc.fill();
 
       // Bulb sprite
       bulbSprite = document.createElement('canvas');
