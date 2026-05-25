@@ -1422,12 +1422,12 @@
             ctx.globalAlpha = 1;
             const cy = by + hang;
             // Wide ambient floor — always-on warmth, larger radius
-            const gr0 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR * 1.7);
-            gr0.addColorStop(0,    'rgba(255,215,125,0.20)');
-            gr0.addColorStop(0.45, 'rgba(255,168,60,0.09)');
+            const gr0 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR * 1.1);
+            gr0.addColorStop(0,    'rgba(255,215,125,0.14)');
+            gr0.addColorStop(0.45, 'rgba(255,168,60,0.06)');
             gr0.addColorStop(1,    'rgba(255,110,30,0)');
             ctx.fillStyle = gr0;
-            ctx.beginPath(); ctx.arc(bxFinal, cy, glowR * 1.7, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(bxFinal, cy, glowR * 1.1, 0, Math.PI * 2); ctx.fill();
             // Flickering inner glow
             const gr1 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR);
             gr1.addColorStop(0,    `rgba(255,238,170,${(alpha * 0.60).toFixed(3)})`);
