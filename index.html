@@ -1266,17 +1266,17 @@
       glowSprite.width = SR * 2; glowSprite.height = SR * 2;
       const gc = glowSprite.getContext('2d');
       gc.filter = 'blur(16px)';
-      gc.fillStyle = 'rgba(255,125,65,0.78)';
+      gc.fillStyle = 'rgba(255,125,65,0.92)';
       gc.beginPath(); gc.arc(SR, SR, 10, 0, Math.PI * 2); gc.fill();
       gc.filter = 'blur(48px)';
-      gc.fillStyle = 'rgba(232,88,48,0.54)';
+      gc.fillStyle = 'rgba(232,88,48,0.78)';
       gc.beginPath(); gc.arc(SR, SR, 8,  0, Math.PI * 2); gc.fill();
       gc.filter = 'blur(80px)';
-      gc.fillStyle = 'rgba(255,100,50,0.30)';
+      gc.fillStyle = 'rgba(255,100,50,0.58)';
       gc.beginPath(); gc.arc(SR, SR, 6,  0, Math.PI * 2); gc.fill();
       // Wide haze layer — only possible because SR is large enough to contain it
       gc.filter = 'blur(120px)';
-      gc.fillStyle = 'rgba(255,80,30,0.16)';
+      gc.fillStyle = 'rgba(255,80,30,0.38)';
       gc.beginPath(); gc.arc(SR, SR, 5,  0, Math.PI * 2); gc.fill();
 
       // Bulb sprite
@@ -1408,11 +1408,12 @@
 
           const fp = FLICKER[si][bi];
           const alpha = 1.0 - fp.amp * (0.5 + 0.5 * Math.sin(ts * fp.freq + fp.phase));
-          // Base glow floor — stays on even at dimmest flicker
-          ctx.globalAlpha = 0.45;
+          // Base glow floor — drawn twice so the halo is clearly visible
+          ctx.globalAlpha = 0.68;
           ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
-          // Flickering glow — drawn twice for punch
-          ctx.globalAlpha = alpha * 0.9;
+          ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
+          // Flickering glow — drawn twice for animated punch
+          ctx.globalAlpha = alpha * 0.95;
           ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
           ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
           // Bulb core — drawn twice for brighter centre
