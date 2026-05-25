@@ -1423,21 +1423,21 @@
             const cy = by + hang;
             // Wide ambient floor — always-on warmth, larger radius
             const gr0 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR * 1.7);
-            gr0.addColorStop(0,    'rgba(255,215,125,0.34)');
-            gr0.addColorStop(0.45, 'rgba(255,168,60,0.16)');
+            gr0.addColorStop(0,    'rgba(255,215,125,0.20)');
+            gr0.addColorStop(0.45, 'rgba(255,168,60,0.09)');
             gr0.addColorStop(1,    'rgba(255,110,30,0)');
             ctx.fillStyle = gr0;
             ctx.beginPath(); ctx.arc(bxFinal, cy, glowR * 1.7, 0, Math.PI * 2); ctx.fill();
             // Flickering inner glow
             const gr1 = ctx.createRadialGradient(bxFinal, cy, 0, bxFinal, cy, glowR);
-            gr1.addColorStop(0,    `rgba(255,238,170,${(alpha * 0.92).toFixed(3)})`);
-            gr1.addColorStop(0.30, `rgba(255,192,88,${(alpha * 0.56).toFixed(3)})`);
-            gr1.addColorStop(0.65, `rgba(255,148,45,${(alpha * 0.22).toFixed(3)})`);
+            gr1.addColorStop(0,    `rgba(255,238,170,${(alpha * 0.60).toFixed(3)})`);
+            gr1.addColorStop(0.30, `rgba(255,192,88,${(alpha * 0.36).toFixed(3)})`);
+            gr1.addColorStop(0.65, `rgba(255,148,45,${(alpha * 0.14).toFixed(3)})`);
             gr1.addColorStop(1,    'rgba(255,100,25,0)');
             ctx.fillStyle = gr1;
             ctx.beginPath(); ctx.arc(bxFinal, cy, glowR, 0, Math.PI * 2); ctx.fill();
             // Bulb core
-            ctx.globalAlpha = Math.min(1, alpha * 1.1);
+            ctx.globalAlpha = Math.min(1, alpha * 0.9);
             ctx.drawImage(bulbSprite, bxFinal - bsc, cy - bsc);
           } else {
             // ── Desktop: pre-rendered sprite ──
