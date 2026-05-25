@@ -626,8 +626,15 @@
       .footer-date { font-size: 0.56rem; letter-spacing: 0.08em; white-space: nowrap; }
       /* hide 囍 background pattern on mobile */
       #travel { background-image: none; }
-      /* hide string lights on mobile */
-      #string-lights { display: none; }
+    }
+
+    /* ── Mobile-only splash tweaks ── */
+    @media (max-width: 720px) {
+      .splash-enter {
+        padding: 11px 30px;
+        font-size: 0.78rem;
+        letter-spacing: 0.18em;
+      }
     }
 
     @media (max-width: 500px) {
@@ -1216,80 +1223,110 @@
 
   // ── String lights ────────────────────────────────────────────────────────
   (function () {
-    const H = 290;
+    const BASE_W = 1280; // design reference width
+
     const canvas = document.createElement('canvas');
     canvas.id = 'string-lights';
     Object.assign(canvas.style, {
       position: 'absolute', top: '-8px', left: '0',
-      width: '100%', height: H + 'px',
+      width: '100%',
       pointerEvents: 'none', zIndex: '8',
       willChange: 'transform', transform: 'translateZ(0)'
     });
     document.body.prepend(canvas);
-
     const ctx = canvas.getContext('2d');
-    let W = window.innerWidth;
-    let lastScrollY = 0, scrollVel = 0, inertia = 0;
 
-    // ── Pre-render glow sprite once (avoids per-frame ctx.filter blur calls) ──
-    const SR = 90; // sprite half-size
-    const glowSprite = document.createElement('canvas');
-    glowSprite.width = SR * 2; glowSprite.height = SR * 2;
-    const gc = glowSprite.getContext('2d');
-    gc.filter = 'blur(16px)';
-    gc.fillStyle = 'rgba(255,125,65,0.78)';
-    gc.beginPath(); gc.arc(SR, SR, 10, 0, Math.PI * 2); gc.fill();
-    gc.filter = 'blur(48px)';
-    gc.fillStyle = 'rgba(232,88,48,0.54)';
-    gc.beginPath(); gc.arc(SR, SR, 8, 0, Math.PI * 2); gc.fill();
-    gc.filter = 'blur(80px)';
-    gc.fillStyle = 'rgba(255,100,50,0.30)';
-    gc.beginPath(); gc.arc(SR, SR, 6, 0, Math.PI * 2); gc.fill();
+    // All sizing is dynamic — recomputed on resize when scale changes
+    let W, H;
+    let SR, BR, bsc, glowSprite, bulbSprite, gw, gh, hang, swayAmpScale;
+    let STRINGS, FLICKER, SWAY;
+    let lastSc = -1, lastScrollY = 0, scrollVel = 0, inertia = 0;
+    let lastSway = null, posCache = [];
 
-    // ── Pre-render bulb body sprite once ──
-    const BR = 7;
-    const bulbSprite = document.createElement('canvas');
-    bulbSprite.width = BR * 2 + 2; bulbSprite.height = BR * 2 + 2;
-    const bc = bulbSprite.getContext('2d');
-    const bsc = BR + 1;
-    const bulbG = bc.createRadialGradient(bsc, bsc, 0, bsc, bsc, BR);
-    bulbG.addColorStop(0,    '#fffde8');
-    bulbG.addColorStop(0.12, '#ffecb8');
-    bulbG.addColorStop(0.28, '#ffd898');
-    bulbG.addColorStop(0.46, '#ffbc78');
-    bulbG.addColorStop(0.64, '#ffa060');
-    bulbG.addColorStop(0.82, '#ff8248');
-    bulbG.addColorStop(1,    'rgba(255,100,55,0)');
-    bc.beginPath(); bc.arc(bsc, bsc, BR, 0, Math.PI * 2);
-    bc.fillStyle = bulbG; bc.fill();
+    // ── Rebuild sprites & string definitions whenever viewport scale shifts ──
+    function buildSprites(sc) {
+      // Visual scale uses a gentler floor so glows don't vanish on narrow screens
+      const vsc = Math.max(0.44, sc);
+      SR          = Math.round(90  * vsc);
+      BR          = Math.max(4, Math.round(7 * vsc));
+      bsc         = BR + 1;
+      gw          = SR * 3.5;
+      gh          = SR * 2.0;
+      hang        = Math.max(0, BR - 3);
+      swayAmpScale = sc; // natural wire sway scales with canvas width
 
-    function resize() { W = window.innerWidth; canvas.width = W; canvas.height = H; }
+      // Glow sprite
+      glowSprite = document.createElement('canvas');
+      glowSprite.width = SR * 2; glowSprite.height = SR * 2;
+      const gc = glowSprite.getContext('2d');
+      gc.filter = `blur(${Math.max(5,  Math.round(16 * vsc))}px)`;
+      gc.fillStyle = 'rgba(255,125,65,0.78)';
+      gc.beginPath(); gc.arc(SR, SR, Math.max(4, Math.round(10 * vsc)), 0, Math.PI * 2); gc.fill();
+      gc.filter = `blur(${Math.max(16, Math.round(48 * vsc))}px)`;
+      gc.fillStyle = 'rgba(232,88,48,0.54)';
+      gc.beginPath(); gc.arc(SR, SR, Math.max(3, Math.round( 8 * vsc)), 0, Math.PI * 2); gc.fill();
+      gc.filter = `blur(${Math.max(26, Math.round(80 * vsc))}px)`;
+      gc.fillStyle = 'rgba(255,100,50,0.30)';
+      gc.beginPath(); gc.arc(SR, SR, Math.max(3, Math.round( 6 * vsc)), 0, Math.PI * 2); gc.fill();
+
+      // Bulb sprite
+      bulbSprite = document.createElement('canvas');
+      bulbSprite.width = BR * 2 + 2; bulbSprite.height = BR * 2 + 2;
+      const bc = bulbSprite.getContext('2d');
+      const bulbG = bc.createRadialGradient(bsc, bsc, 0, bsc, bsc, BR);
+      bulbG.addColorStop(0,    '#fffde8');
+      bulbG.addColorStop(0.12, '#ffecb8');
+      bulbG.addColorStop(0.28, '#ffd898');
+      bulbG.addColorStop(0.46, '#ffbc78');
+      bulbG.addColorStop(0.64, '#ffa060');
+      bulbG.addColorStop(0.82, '#ff8248');
+      bulbG.addColorStop(1,    'rgba(255,100,55,0)');
+      bc.beginPath(); bc.arc(bsc, bsc, BR, 0, Math.PI * 2);
+      bc.fillStyle = bulbG; bc.fill();
+
+      // String geometry — y values and droop scale with canvas height;
+      // bulb count scales with canvas width so spacing stays consistent
+      const hsc = H / 290;
+      STRINGS = [
+        { x0F: 0,    y0: Math.round(  2*hsc), x1F: 1,    y1: Math.round(  2*hsc), cpxF: 0.95, cpy: Math.round(305*hsc), n: Math.max(4, Math.round(19*sc)) },
+        { x0F: 0,    y0: Math.round( 75*hsc), x1F: 0.60, y1: Math.round(  2*hsc), cpxF: 0.05, cpy: Math.round(305*hsc), n: Math.max(3, Math.round(14*sc)) },
+        { x0F: 0.57, y0: Math.round( 60*hsc), x1F: 1.00, y1: Math.round(185*hsc), cpxF: 0.77, cpy: Math.round(210*hsc), n: Math.max(3, Math.round( 9*sc)) },
+      ];
+
+      // Per-bulb flicker — each bulb gets its own phase, speed, depth
+      FLICKER = STRINGS.map(s => Array.from({ length: s.n }, () => ({
+        phase: Math.random() * Math.PI * 2,
+        freq:  0.0018 + Math.random() * 0.0028,
+        amp:   0.32   + Math.random() * 0.30,
+      })));
+      // Per-bulb pendulum sway — amplitude scales with canvas width
+      SWAY = STRINGS.map(s => Array.from({ length: s.n }, () => ({
+        phase: Math.random() * Math.PI * 2,
+        freq:  0.0003 + Math.random() * 0.0006,
+        amp:   (2.5 + Math.random() * 4.0) * sc,
+      })));
+      posCache = STRINGS.map(() => []);
+      lastSway = null;
+    }
+
+    function resize() {
+      W = window.innerWidth;
+      const sc = Math.min(1, W / BASE_W);
+      // Canvas height scales with width, floored so it stays usable on tiny screens
+      H = Math.max(150, Math.round(290 * Math.max(sc, 0.55)));
+      canvas.width  = W;
+      canvas.height = H;
+      canvas.style.height = H + 'px';
+      // Rebuild sprites only when scale shifts enough to be noticeable
+      if (Math.abs(sc - lastSc) > 0.04) { lastSc = sc; buildSprites(sc); }
+    }
+
     window.addEventListener('resize', resize, { passive: true });
     window.addEventListener('scroll', () => {
       const dy = window.scrollY - lastScrollY;
       lastScrollY = window.scrollY;
       scrollVel = dy;
     }, { passive: true });
-
-    const STRINGS = [
-      { x0F: 0,    y0: 2,  x1F: 1,    y1: 2, cpxF: 0.95, cpy: 305, n: 19 },
-      { x0F: 0,    y0: 75, x1F: 0.60, y1: 2, cpxF: 0.05, cpy: 305, n: 14 },
-      { x0F: 0.57, y0: 60, x1F: 1.00, y1: 185, cpxF: 0.77, cpy: 210, n: 9  },
-    ];
-
-    // Per-bulb flicker params — each bulb gets its own phase, speed, and depth
-    const FLICKER = STRINGS.map(s => Array.from({ length: s.n }, () => ({
-      phase: Math.random() * Math.PI * 2,          // random start position in cycle
-      freq:  0.0018 + Math.random() * 0.0028,      // noticeable variation speed
-      amp:   0.32  + Math.random() * 0.30,         // 32–62% brightness swing
-    })));
-
-    // Per-bulb pendulum sway — each bulb hangs and swings at its own rate
-    const SWAY = STRINGS.map(s => Array.from({ length: s.n }, () => ({
-      phase: Math.random() * Math.PI * 2,
-      freq:  0.0003 + Math.random() * 0.0006,
-      amp:   2.5 + Math.random() * 4.0,
-    })));
 
     function bez(t, x0, y0, cpx, cpy, x1, y1) {
       const mt = 1 - t;
@@ -1315,23 +1352,19 @@
       return ts;
     }
 
-    // Cache bulb positions — only recompute when sway shifts enough
-    let lastSway = null;
-    const posCache = STRINGS.map(() => []);  // one entry per string, auto-sized
-
     function draw(ts) {
       inertia += scrollVel * 0.10;
       inertia -= inertia * 0.04;
       inertia *= 0.88;
       inertia = Math.max(-10, Math.min(10, inertia));
       scrollVel *= 0.55;
-      // Two-frequency sway for organic back-and-forth motion
-      const naturalSway = Math.sin(ts / 1800) * 22 + Math.sin(ts / 3300) * 10;
+      // Two-frequency sway — amplitude proportional to canvas width
+      const naturalSway = (Math.sin(ts / 1800) * 22 + Math.sin(ts / 3300) * 10) * swayAmpScale;
       const sway = naturalSway + inertia;
 
       ctx.clearRect(0, 0, W, H);
 
-      // Recompute bulb positions only when sway changes noticeably
+      // Recompute bulb positions only when sway shifts enough to matter
       const swayChanged = lastSway === null || Math.abs(sway - lastSway) > 0.4;
       if (swayChanged) {
         lastSway = sway;
@@ -1346,7 +1379,7 @@
         const s = STRINGS[si];
         const x0 = s.x0F * W, x1 = s.x1F * W, cpx = s.cpxF * W + sway;
 
-        // Wire — slightly thicker, warmer neutral tone
+        // Wire
         ctx.beginPath();
         ctx.moveTo(x0, s.y0);
         ctx.quadraticCurveTo(cpx, s.cpy, x1, s.y1);
@@ -1354,21 +1387,17 @@
         ctx.lineWidth = 1.0;
         ctx.stroke();
 
-        // Bulbs — hang below wire, with per-bulb pendulum offset + flicker
-        const gw = SR * 3.5, gh = SR * 2.0; // less extreme ellipse, more natural
-        const hang = BR - 3;
+        // Bulbs — hang below wire, per-bulb pendulum + flicker
         posCache[si].forEach((pos, bi) => {
           const { x: bx, y: by } = pos;
           if (by < 0 || by > H) return;
 
-          // Per-bulb pendulum sway
           const sw = SWAY[si][bi];
           const bxFinal = bx + Math.sin(ts * sw.freq + sw.phase) * sw.amp;
 
-          // Flicker alpha
           const fp = FLICKER[si][bi];
           const alpha = 1.0 - fp.amp * (0.5 + 0.5 * Math.sin(ts * fp.freq + fp.phase));
-          // Base glow — always-on floor so even dimmest flicker stays luminous
+          // Base glow floor — stays on even at dimmest flicker
           ctx.globalAlpha = 0.45;
           ctx.drawImage(glowSprite, bxFinal - gw/2, (by + hang) - gh/2, gw, gh);
           // Flickering glow — drawn twice for punch
