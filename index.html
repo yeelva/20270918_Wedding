@@ -116,25 +116,15 @@
 
     #hero {
       background-color: var(--sign-bg);
+      background-image: linear-gradient(to bottom, rgba(28,32,30,0.68) 0%, rgba(28,32,30,0.88) 100%), url('images/venue.jpg');
+      background-size: cover;
+      background-position: center 70%;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 52px 40px;
       position: relative;
       overflow: hidden;
-    }
-
-    #hero-bg {
-      position: absolute;
-      top: -25%;
-      left: 0;
-      right: 0;
-      bottom: -25%;
-      background-image: linear-gradient(to bottom, rgba(28,32,30,0.68) 0%, rgba(28,32,30,0.88) 100%), url('images/venue.jpg');
-      background-size: cover;
-      background-position: center 60%;
-      will-change: transform;
-      transform: translateY(0);
     }
 
 
@@ -978,7 +968,6 @@
 
 <!-- HERO -->
 <section id="hero">
-  <div id="hero-bg"></div>
   <div class="neon-frame">
     <p class="neon-invite">You are warmly invited to</p>
     <h1 class="neon-title">Ian & Elva's Wedding</h1>
@@ -1702,28 +1691,13 @@
 </script>
 
 <script>
-/* ── PARALLAX HERO ── */
-(function () {
-  const bg = document.getElementById('hero-bg');
-  if (!bg) return;
-  let scrollTarget = 0, current = 0;
-  window.addEventListener('scroll', function () {
-    scrollTarget = window.scrollY;
-  }, { passive: true });
-  (function tick() {
-    current += (scrollTarget - current) * 0.09;
-    bg.style.transform = 'translateY(' + (current * 0.28) + 'px)';
-    requestAnimationFrame(tick);
-  })();
-})();
-
 /* ── FIREFLIES ── */
 (function () {
   const hero = document.getElementById('hero');
   if (!hero) return;
   const fc = document.createElement('canvas');
   fc.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;';
-  hero.insertBefore(fc, document.getElementById('hero-bg').nextSibling);
+  hero.insertBefore(fc, hero.firstChild);
   const ctx = fc.getContext('2d');
   function resize() { fc.width = hero.offsetWidth; fc.height = hero.offsetHeight; }
   resize();
