@@ -1280,6 +1280,17 @@
     document.body.prepend(canvas);
     const ctx = canvas.getContext('2d');
 
+    // On mobile: fade string lights out once hero scrolls out of view
+    const heroEl = document.getElementById('hero');
+    if (heroEl) {
+      const heroObs = new IntersectionObserver(([e]) => {
+        const isMobile = window.innerWidth < 720;
+        if (isMobile) canvas.style.opacity = e.isIntersecting ? '1' : '0';
+        else canvas.style.opacity = '1';
+      }, { threshold: 0 });
+      heroObs.observe(heroEl);
+    }
+
     // All sizing is dynamic — recomputed on resize when scale changes
     let W, H;
     let SR, BR, bsc, glowSprite, bulbSprite, gw, gh, hang, swayAmpScale, useDirect, glowR, glowBright;
