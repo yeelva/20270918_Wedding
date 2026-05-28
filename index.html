@@ -1271,12 +1271,22 @@
     const canvas = document.createElement('canvas');
     canvas.id = 'string-lights';
     Object.assign(canvas.style, {
-      position: 'absolute', top: '-8px', left: '0',
+      position: 'fixed', top: '0', left: '0',
       width: '100%',
       pointerEvents: 'none', zIndex: '8',
+      transition: 'opacity 0.5s ease',
       willChange: 'transform', transform: 'translateZ(0)'
     });
     document.body.prepend(canvas);
+
+    // Fade out string lights once hero is scrolled out of view
+    const heroEl = document.getElementById('hero');
+    if (heroEl) {
+      const heroObs = new IntersectionObserver(([e]) => {
+        canvas.style.opacity = e.isIntersecting ? '1' : '0';
+      }, { threshold: 0 });
+      heroObs.observe(heroEl);
+    }
     const ctx = canvas.getContext('2d');
 
     // All sizing is dynamic — recomputed on resize when scale changes
