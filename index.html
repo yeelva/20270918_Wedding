@@ -1271,25 +1271,26 @@
     const canvas = document.createElement('canvas');
     canvas.id = 'string-lights';
     Object.assign(canvas.style, {
-      position: 'fixed', top: '0', left: '0',
-      width: '100%',
+      top: '0', left: '0', width: '100%',
       pointerEvents: 'none', zIndex: '8',
-      transition: 'opacity 0.5s ease',
       willChange: 'transform', transform: 'translateZ(0)'
     });
-    document.body.prepend(canvas);
     const ctx = canvas.getContext('2d');
-
-    // On mobile: fade string lights out once hero scrolls out of view
     const heroEl = document.getElementById('hero');
-    if (heroEl) {
-      const heroObs = new IntersectionObserver(([e]) => {
-        const isMobile = window.innerWidth < 720;
-        if (isMobile) canvas.style.opacity = e.isIntersecting ? '1' : '0';
-        else canvas.style.opacity = '1';
-      }, { threshold: 0 });
-      heroObs.observe(heroEl);
+
+    // Mobile: canvas lives inside #hero (position:absolute) — scrolls away with hero
+    // Desktop: canvas on body (position:fixed) — always visible at top of viewport
+    function placeCanvas() {
+      const isMob = window.innerWidth < 720;
+      if (isMob) {
+        canvas.style.position = 'absolute';
+        if (heroEl && canvas.parentElement !== heroEl) heroEl.insertBefore(canvas, heroEl.firstChild);
+      } else {
+        canvas.style.position = 'fixed';
+        if (canvas.parentElement !== document.body) document.body.prepend(canvas);
+      }
     }
+    placeCanvas();
 
     // All sizing is dynamic — recomputed on resize when scale changes
     let W, H;
@@ -1358,12 +1359,12 @@
       // On narrow screens add 15 % extra droop depth so the catenary is
       // clearly visible rather than just peeking into frame.
       const hsc     = H / 290;
-      const droopSc = sc < 0.8 ? 1.15 : 1.0;
+      const droopSc = sc < 0.8 ? 0.64 : 1.0;
       const deskAdj = sc >= 0.8 ? -3 : 0; // remove 3 bulbs per string on desktop only
       STRINGS = [
         { x0F: 0,    y0: Math.round(  2*hsc), x1F: 1,    y1: Math.round(  2*hsc), cpxF: 0.95, cpy: Math.round(305*hsc*droopSc), n: Math.max(4, Math.round(19*sc) + deskAdj) },
         { x0F: 0,    y0: Math.round( 75*hsc), x1F: 0.60, y1: Math.round(  2*hsc), cpxF: 0.05, cpy: Math.round(305*hsc*droopSc), n: Math.max(3, Math.round(14*sc) + deskAdj) },
-        { x0F: 0.57, y0: Math.round( 60*hsc), x1F: 1.00, y1: Math.round(185*hsc), cpxF: 0.77, cpy: Math.round(210*hsc*droopSc), n: Math.max(3, Math.round( 9*sc) + deskAdj) },
+        { x0F: 0.57, y0: Math.round(  4*hsc), x1F: 1.00, y1: Math.round(110*hsc), cpxF: 0.77, cpy: Math.round(210*hsc*droopSc), n: Math.max(3, Math.round( 9*sc) + deskAdj) },
       ];
 
       // Per-bulb flicker — each bulb gets its own phase, speed, depth
@@ -1383,6 +1384,7 @@
     }
 
     function resize() {
+      placeCanvas();
       W = window.innerWidth;
       const sc = Math.min(1, W / BASE_W);
       // Canvas height — tall enough that the catenary droop is clearly visible
