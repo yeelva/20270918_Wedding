@@ -1736,12 +1736,12 @@
       f.y = (f.y + f.vy + fc.height) % fc.height;
       const a = 0.15 + 0.7 * (0.5 + 0.5 * Math.sin(t * f.freq + f.phase));
       const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 12);
-      g.addColorStop(0,   `rgba(255,230,140,${(a * 0.32).toFixed(3)})`);
-      g.addColorStop(0.3, `rgba(255,200,80,${(a * 0.14).toFixed(3)})`);
-      g.addColorStop(1,   'rgba(255,170,40,0)');
+      g.addColorStop(0,   `rgba(255,175,70,${(a * 0.22).toFixed(3)})`);
+      g.addColorStop(0.3, `rgba(255,130,28,${(a * 0.09).toFixed(3)})`);
+      g.addColorStop(1,   'rgba(255,100,15,0)');
       ctx.fillStyle = g;
       ctx.beginPath(); ctx.arc(f.x, f.y, f.r * 12, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = `rgba(255,245,200,${(a * 0.55).toFixed(3)})`;
+      ctx.fillStyle = `rgba(255,185,95,${(a * 0.38).toFixed(3)})`;
       ctx.beginPath(); ctx.arc(f.x, f.y, f.r * 0.7, 0, Math.PI * 2); ctx.fill();
     });
     requestAnimationFrame(loop);
