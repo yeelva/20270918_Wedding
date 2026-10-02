@@ -1155,9 +1155,63 @@
       <span class="section-num">05 / 05</span>
     </div>
 
-    <div style="text-align:center; padding: 20px 0 32px;">
-      <p class="rsvp-intro">We'd love to know if you can make it. Takes about 2 minutes.</p>
-      <a href="https://forms.gle/RCNAD5GXybNwmZdg9" target="_blank" rel="noopener" class="btn-submit" style="display:inline-block; text-decoration:none; margin-top: 8px;">RSVP Now</a>
+    <form id="rsvp-form" onsubmit="submitRSVP(event)">
+      <div class="form-grid">
+        <div class="f-field">
+          <label for="fname">First name</label>
+          <input type="text" id="fname" placeholder="Ada" required />
+        </div>
+        <div class="f-field">
+          <label for="lname">Last name</label>
+          <input type="text" id="lname" placeholder="Lovelace" required />
+        </div>
+        <div class="f-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required />
+        </div>
+        <div class="f-field">
+          <label for="phone">Phone number</label>
+          <input type="tel" id="phone" placeholder="(555) 000-0000" />
+        </div>
+        <div class="f-field full">
+          <label>Will you be joining us?</label>
+          <div class="toggle-group">
+            <div class="toggle-opt">
+              <input type="radio" id="att-yes" name="attending" value="Joyfully accepts" required />
+              <label for="att-yes">Wouldn't miss it</label>
+            </div>
+            <div class="toggle-opt">
+              <input type="radio" id="att-no" name="attending" value="Regretfully declines" />
+              <label for="att-no">Can't make it, sadly</label>
+            </div>
+          </div>
+        </div>
+        <div class="f-field">
+          <label for="guests">Guests (including you)</label>
+          <select id="guests">
+            <option value="1">Just me</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+        <div class="f-field">
+          <label for="dietary">Dietary needs</label>
+          <input type="text" id="dietary" placeholder="Vegetarian, allergies, etc." />
+        </div>
+        <div class="f-field full">
+          <label for="note">Song request or note</label>
+          <textarea id="note" placeholder="Song requests, questions, kind words — all welcome."></textarea>
+        </div>
+        <div class="f-field full">
+          <button type="submit" class="btn-submit">Send RSVP</button>
+        </div>
+      </div>
+    </form>
+
+    <div id="rsvp-success">
+      <div class="big">See you there 🎉</div>
+      <p>We'll be in touch closer to the date with more details.</p>
     </div>
 
     <p class="rsvp-deadline">Please RSVP by <strong style="color:#8b1a1a;">July 1, 2027.</strong></p>
@@ -1566,10 +1620,32 @@
     });
   })();
 
+  const RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzJQTOVC7Aq3ud-F1LRMjuR6EwM44NXo3CJ1wPi4seo1xqEnkywUS8hSrd2YAroy9s0jA/exec';
+
   function submitRSVP(e) {
     e.preventDefault();
-    document.getElementById('rsvp-form').style.display = 'none';
-    document.getElementById('rsvp-success').style.display = 'block';
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    const data = {
+      firstName: document.getElementById('fname').value,
+      lastName:  document.getElementById('lname').value,
+      email:     document.getElementById('email').value,
+      phone:     document.getElementById('phone').value,
+      attending: document.querySelector('input[name=attending]:checked')?.value || '',
+      guests:    document.getElementById('guests').value,
+      dietary:   document.getElementById('dietary').value,
+      note:      document.getElementById('note').value,
+    };
+    fetch(RSVP_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).finally(() => {
+      document.getElementById('rsvp-form').style.display = 'none';
+      document.getElementById('rsvp-success').style.display = 'block';
+    });
   }
 
 
