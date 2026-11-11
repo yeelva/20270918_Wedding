@@ -158,8 +158,9 @@
     .neon-title {
       font-family: 'Zeyada', cursive;
       font-weight: 400;
-      font-size: clamp(3.2rem, 9vw, 7.5rem);
+      font-size: clamp(3.2rem, 6.5vw, 5.8rem);
       -webkit-text-stroke: 0.4px #f47858;
+      white-space: nowrap;
       letter-spacing: 0.02em;
       line-height: 1.1;
       color: #f47858;
@@ -648,6 +649,15 @@
     @media (max-width: 500px) {
       .sched-grid { grid-template-columns: 1fr; }
       .travel-grid { grid-template-columns: 1fr; }
+      .neon-title {
+        white-space: normal;
+        font-size: clamp(2.8rem, 11vw, 4rem);
+        text-shadow:
+          0 0 4px #f47858,
+          0 0 10px rgba(244,120,88,0.6),
+          0 0 28px rgba(220,96,60,0.30),
+          0 0 55px rgba(196,72,48,0.18);
+      }
     }
 
     /* ── PHOTOS CAROUSEL ── */
