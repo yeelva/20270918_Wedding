@@ -1195,15 +1195,6 @@
           </div>
         </div>
         <div class="f-field">
-          <label for="guests">Guests (including you)</label>
-          <select id="guests">
-            <option value="1">Just me</option>
-            <option value="2" selected>2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-          </select>
-        </div>
-        <div class="f-field">
           <label for="dietary">Dietary needs</label>
           <input type="text" id="dietary" placeholder="Vegetarian, allergies, etc." />
         </div>
@@ -1223,6 +1214,7 @@
     </div>
 
     <p class="rsvp-deadline">Please RSVP by <strong style="color:#8b1a1a;">July 1, 2027.</strong></p>
+    <p class="rsvp-deadline" style="font-size:0.78rem; margin-top:8px; color:var(--muted);"><em>*Note: Please have each member of your party submit this RSVP individually.</em></p>
   </div>
 </section>
 
@@ -1641,7 +1633,6 @@
       email:     document.getElementById('email').value,
       phone:     document.getElementById('phone').value,
       attending: document.querySelector('input[name=attending]:checked')?.value || '',
-      guests:    document.getElementById('guests').value,
       dietary:   document.getElementById('dietary').value,
       note:      document.getElementById('note').value,
     };
