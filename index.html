@@ -330,7 +330,7 @@
 
     .travel-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 1px;
       background: rgba(90,100,80,0.35);
     }
@@ -341,7 +341,6 @@
     }
 
     .t-card.featured {
-      grid-column: 1 / -1;
       background: #DDE4D4;
     }
 
@@ -610,8 +609,7 @@
       .info-item { border-right: none; border-bottom: 1px solid var(--border); padding: 24px 32px; }
       .info-item:last-child { border-bottom: none; }
       .sched-grid { grid-template-columns: 1fr 1fr; }
-      .travel-grid { grid-template-columns: 1fr 1fr; }
-      .t-card.featured { grid-column: 1 / -1; }
+      .travel-grid { grid-template-columns: 1fr; }
       .form-grid { grid-template-columns: 1fr; }
       .f-field.full { grid-column: span 1; }
       .section-wrap { padding: 64px 24px; }
@@ -1085,19 +1083,21 @@
         <div class="tc-body">Both about 30–40 min away. SFO has more direct routes; OAK is often cheaper.</div>
       </div>
       <div class="t-card">
-        <div class="tc-label">Driving</div>
-        <div class="tc-title">101 N to Hwy 1</div>
-        <div class="tc-body">Parking on-site. Carpooling encouraged — we'll set up a board closer to the date.</div>
-      </div>
-      <div class="t-card">
-        <div class="tc-label">From SF</div>
-        <div class="tc-title">Ferry + Rideshare</div>
-        <div class="tc-body">Golden Gate Ferry to Sausalito, then a short rideshare. Or drive over the bridge for the view.</div>
+        <div class="tc-label">Getting here</div>
+        <div class="tc-title">Driving &amp; From SF</div>
+        <div class="tc-body">
+          <p style="margin-bottom:0.75em;"><strong>Driving:</strong> Take 101 N to Hwy 1. Parking is on-site — carpooling encouraged, we'll set up a board closer to the date.</p>
+          <p><strong>From SF:</strong> Golden Gate Ferry to Sausalito, then a short rideshare. Or drive over the bridge for the view.</p>
+        </div>
       </div>
       <div class="t-card">
         <div class="tc-label">Where to stay</div>
         <div class="tc-title">Hotels nearby</div>
-        <div class="tc-body">Mill Valley and Sausalito have great options nearby. We recommend checking both towns for availability.</div>
+        <div class="tc-body">
+          <p style="margin-bottom:0.75em;"><strong>Hotel block:</strong> We've reserved a block of rooms at <strong>Travelodge by Wyndham Mill Valley/Sausalito</strong>. Look for the room block link in your invitation.</p>
+          <p style="margin-bottom:0.75em;">We'll be staying at the <strong>Mill Valley Inn</strong> — a charming boutique inn right in town.</p>
+          <p>There are also plenty of other nearby hotels and Airbnbs in Mill Valley and Sausalito. We recommend booking early — September weekends fill up fast!</p>
+        </div>
       </div>
     </div>
   </div>
