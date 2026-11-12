@@ -615,18 +615,19 @@
 
     .polaroid-img {
       display: block;
-      border-radius: 2px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.20), 0 2px 6px rgba(0,0,0,0.10);
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,0.22)) drop-shadow(0 2px 4px rgba(0,0,0,0.12));
     }
 
     .polaroid-img:first-child {
       width: 160px;
       transform: rotate(-6deg) translateY(14px);
+      clip-path: polygon(1% 10%, 97% 1%, 97% 91%, 1% 100%);
     }
 
     .polaroid-img:last-child {
       width: 155px;
       transform: rotate(5deg) translateY(-6px);
+      clip-path: polygon(1% 1%, 99% 8%, 99% 100%, 1% 93%);
     }
 
     @media (max-width: 500px) {
