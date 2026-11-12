@@ -602,6 +602,38 @@
       opacity: 0.75;
     }
 
+    /* ── POLAROID STRIP ── */
+    #polaroid-strip {
+      background: var(--cream);
+      padding: 36px 20px 16px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      overflow: visible;
+    }
+
+    .polaroid-img {
+      display: block;
+      border-radius: 2px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.20), 0 2px 6px rgba(0,0,0,0.10);
+    }
+
+    .polaroid-img:first-child {
+      width: 160px;
+      transform: rotate(-6deg) translateY(14px);
+    }
+
+    .polaroid-img:last-child {
+      width: 155px;
+      transform: rotate(5deg) translateY(-6px);
+    }
+
+    @media (max-width: 500px) {
+      .polaroid-img:first-child { width: 130px; }
+      .polaroid-img:last-child  { width: 126px; }
+    }
+
     /* ── RESPONSIVE ── */
     .nav-mark-short { display: none; }
 
@@ -1004,6 +1036,12 @@
     </div>
     <p class="neon-date">September 18, 2027</p>
   </div>
+</section>
+
+<!-- POLAROID STRIP -->
+<section id="polaroid-strip">
+  <img class="polaroid-img" src="images/polaroid-left.jpg" alt="Ian & Elva">
+  <img class="polaroid-img" src="images/polaroid-right.jpg" alt="Elva showing her ring">
 </section>
 
 <!-- INFO STRIP -->
