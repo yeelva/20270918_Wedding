@@ -292,7 +292,7 @@
 </div>
 
 <script>
-  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzJQTOVC7Aq3ud-F1LRMjuR6EwM44NXo3CJ1wPi4seo1xqEnkywUS8hSrd2YAroy9s0jA/exec';
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbydQty_IkrzhMIOuNjMlxeaB8NIhV8QQLGa0zUq53gZ-la7ymzTPzfY6bCLslfL8cUkRg/exec';
   const PASSWORD = 'babo';
 
   function login(e) {
@@ -313,15 +313,20 @@
     document.getElementById('login-error').style.display = 'none';
   }
 
-  async function loadRSVPs() {
-    try {
-      const res = await fetch(`${ENDPOINT}?token=${PASSWORD}`, { redirect: 'follow' });
-      const json = await res.json();
+  function loadRSVPs() {
+    const cb = 'rsvpCb_' + Date.now();
+    window[cb] = function(json) {
+      delete window[cb];
+      if (script.parentNode) script.parentNode.removeChild(script);
       renderTable(json.rows || []);
-    } catch (err) {
+    };
+    const script = document.createElement('script');
+    script.src = `${ENDPOINT}?token=${PASSWORD}&callback=${cb}`;
+    script.onerror = function() {
       document.getElementById('table-wrap').innerHTML =
-        '<div class="state-msg error">Could not load responses — make sure the Apps Script has been updated with the doGet function and re-deployed.</div>';
-    }
+        '<div class="state-msg error">Could not load responses. Check that the Apps Script is deployed as a Web App with access set to "Anyone".</div>';
+    };
+    document.head.appendChild(script);
   }
 
   function renderTable(rows) {
