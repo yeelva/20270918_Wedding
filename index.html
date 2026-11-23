@@ -1055,17 +1055,17 @@
     <li><a href="#rsvp">RSVP</a></li>
     <li><a href="#share">Photos</a></li>
   </ul>
-  <button class="nav-menu-btn" onclick="document.getElementById('nav-overlay').classList.add('open')">Menu</button>
+  <button class="nav-menu-btn" id="nav-menu-btn" onclick="const o=document.getElementById('nav-overlay');o.classList.toggle('open');this.textContent=o.classList.contains('open')?'Close':'Menu';">Menu</button>
 </nav>
 
 <div id="nav-overlay">
-  <button class="nav-overlay-close" onclick="document.getElementById('nav-overlay').classList.remove('open')">Close</button>
-  <a href="#schedule" class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Schedule</a>
-  <a href="#travel"   class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Travel</a>
-  <a href="#registry" class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Registry</a>
-  <a href="#qa"       class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Q&amp;A</a>
-  <a href="#rsvp"     class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">RSVP</a>
-  <a href="#share"    class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Photos</a>
+  <button class="nav-overlay-close" onclick="document.getElementById('nav-overlay').classList.remove('open');document.getElementById('nav-menu-btn').textContent='Menu';">Close</button>
+  <a href="#schedule" class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open');document.getElementById('nav-menu-btn').textContent='Menu';">Schedule</a>
+  <a href="#travel"   class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open');document.getElementById('nav-menu-btn').textContent='Menu';">Travel</a>
+  <a href="#registry" class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open');document.getElementById('nav-menu-btn').textContent='Menu';">Registry</a>
+  <a href="#qa"       class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open');document.getElementById('nav-menu-btn').textContent='Menu';">Q&amp;A</a>
+  <a href="#rsvp"     class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open');document.getElementById('nav-menu-btn').textContent='Menu';">RSVP</a>
+  <a href="#share"    class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open');document.getElementById('nav-menu-btn').textContent='Menu';">Photos</a>
 </div>
 
 <!-- HERO -->
