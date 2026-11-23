@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSVP Admin — Ian & Elva</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #f4ede2;
+      --ink: #252018;
+      --text: #3a3428;
+      --muted: #7a7060;
+      --border: #d0c4b0;
+      --blush: #f4e6dc;
+      --terra: #c05e3c;
+      --sage-pale: #ECF0E6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .login-box {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 48px 40px;
+      max-width: 340px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .login-title {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.5rem;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .login-sub {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .login-box input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      outline: none;
+      margin-bottom: 14px;
+      text-align: center;
+      letter-spacing: 0.12em;
+      background: var(--cream);
+    }
+
+    .login-box input:focus { border-color: var(--terra); }
+
+    .btn {
+      display: inline-block;
+      width: 100%;
+      background: rgba(196,80,50,0.18);
+      color: #8b1a1a;
+      border: none;
+      padding: 13px 32px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn:hover { background: rgba(196,80,50,0.30); color: #6b1010; }
+
+    .login-error {
+      margin-top: 12px;
+      font-size: 0.78rem;
+      color: #8b1a1a;
+      display: none;
+    }
+
+    /* ── ADMIN DASHBOARD ── */
+    #admin-screen { display: none; }
+
+    .admin-nav {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .admin-nav-title {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--ink);
+    }
+
+    .admin-nav-sub {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .sign-out-btn {
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .sign-out-btn:hover { color: var(--text); }
+
+    .admin-body {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 48px 40px;
+    }
+
+    /* Stats */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      margin-bottom: 40px;
+    }
+
+    .stat-box {
+      background: var(--blush);
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 2.2rem;
+      font-weight: 300;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 7px;
+    }
+
+    /* Table */
+    .section-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    th {
+      font-size: 0.58rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+      background: var(--cream);
+    }
+
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(244,230,220,0.5); }
+
+    .att-yes { color: #3a6e48; font-weight: 500; }
+    .att-no  { color: var(--muted); }
+
+    .state-msg {
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 0.84rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .state-msg.error { color: #8b1a1a; }
+
+    @media (max-width: 720px) {
+      .admin-nav { padding: 0 20px; }
+      .admin-body { padding: 32px 20px; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 400px) {
+      .login-box { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-title">Ian & Elva</div>
+    <div class="login-sub">RSVP Admin</div>
+    <form id="login-form" onsubmit="login(event)">
+      <input type="password" id="pwd" placeholder="Password" autocomplete="current-password">
+      <button type="submit" class="btn">Enter</button>
+    </form>
+    <div class="login-error" id="login-error">Incorrect password.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="admin-screen">
+  <nav class="admin-nav">
+    <div>
+      <div class="admin-nav-title">Ian & Elva</div>
+      <div class="admin-nav-sub">RSVP Admin · Sept 18, 2027</div>
+    </div>
+    <a href="#" class="sign-out-btn" onclick="logout(); return false;">Sign out</a>
+  </nav>
+
+  <div class="admin-body">
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" id="stat-total">—</div>
+        <div class="stat-label">Responses</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-yes">—</div>
+        <div class="stat-label">Attending</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-no">—</div>
+        <div class="stat-label">Declining</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-pending">—</div>
+        <div class="stat-label">No response</div>
+      </div>
+    </div>
+
+    <div class="section-label">All responses</div>
+    <div class="table-wrap" id="table-wrap">
+      <div class="state-msg">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzJQTOVC7Aq3ud-F1LRMjuR6EwM44NXo3CJ1wPi4seo1xqEnkywUS8hSrd2YAroy9s0jA/exec';
+  const PASSWORD = 'babo';
+
+  function login(e) {
+    e.preventDefault();
+    if (document.getElementById('pwd').value === PASSWORD) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+      loadRSVPs();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+
+  function logout() {
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('pwd').value = '';
+    document.getElementById('login-error').style.display = 'none';
+  }
+
+  async function loadRSVPs() {
+    try {
+      const res = await fetch(`${ENDPOINT}?token=${PASSWORD}`, { redirect: 'follow' });
+      const json = await res.json();
+      renderTable(json.rows || []);
+    } catch (err) {
+      document.getElementById('table-wrap').innerHTML =
+        '<div class="state-msg error">Could not load responses — make sure the Apps Script has been updated with the doGet function and re-deployed.</div>';
+    }
+  }
+
+  function renderTable(rows) {
+    const yes = rows.filter(r => (r['Attending'] || '').toLowerCase().includes('accept')).length;
+    const no  = rows.filter(r => (r['Attending'] || '').toLowerCase().includes('declin')).length;
+
+    document.getElementById('stat-total').textContent   = rows.length;
+    document.getElementById('stat-yes').textContent     = yes;
+    document.getElementById('stat-no').textContent      = no;
+    document.getElementById('stat-pending').textContent = rows.length - yes - no;
+
+    if (rows.length === 0) {
+      document.getElementById('table-wrap').innerHTML = '<div class="state-msg">No responses yet.</div>';
+      return;
+    }
+
+    const fmt = ts => {
+      try { return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+      catch { return ts || ''; }
+    };
+
+    const html = rows.slice().reverse().map(r => {
+      const att = r['Attending'] || '';
+      const cls = att.toLowerCase().includes('accept') ? 'att-yes' : att.toLowerCase().includes('declin') ? 'att-no' : '';
+      return `<tr>
+        <td>${fmt(r['Timestamp'])}</td>
+        <td><strong>${(r['First Name'] || '')} ${(r['Last Name'] || '')}</strong></td>
+        <td class="${cls}">${att}</td>
+        <td>${r['Email'] || ''}</td>
+        <td>${r['Phone'] || ''}</td>
+        <td>${r['Dietary'] || ''}</td>
+        <td>${r['Note'] || ''}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('table-wrap').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Name</th><th>Attending</th>
+            <th>Email</th><th>Phone</th><th>Dietary</th><th>Note</th>
+          </tr>
+        </thead>
+        <tbody>${html}</tbody>
+      </table>`;
+  }
+</script>
+
+</body>
+</html>
