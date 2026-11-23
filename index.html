@@ -108,6 +108,64 @@
 
     nav a:hover { color: var(--terra); }
 
+    .nav-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text);
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .nav-menu-btn:hover { color: var(--terra); }
+
+    #nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      background: var(--cream);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+    }
+    #nav-overlay.open { display: flex; }
+
+    .nav-overlay-link {
+      text-decoration: none;
+      color: var(--ink);
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-overlay-link:hover { color: var(--terra); }
+
+    .nav-overlay-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .nav-overlay-close:hover { color: var(--terra); }
+
     /* ── HERO ── */
     #hero::before {
       content: '囍';
@@ -630,8 +688,8 @@
       .section-wrap { padding: 64px 24px; }
       nav { padding: 0 20px; }
       footer { padding: 40px 24px; }
-      nav ul { gap: 14px; }
-      nav a { font-size: 0.62rem; letter-spacing: 0.10em; }
+      nav ul { display: none; }
+      .nav-menu-btn { display: block; }
       .lantern-bg { display: none; }
       /* tighten section typography on mobile */
       body { font-size: 14px; }
@@ -997,7 +1055,18 @@
     <li><a href="#rsvp">RSVP</a></li>
     <li><a href="#share">Photos</a></li>
   </ul>
+  <button class="nav-menu-btn" onclick="document.getElementById('nav-overlay').classList.add('open')">Menu</button>
 </nav>
+
+<div id="nav-overlay">
+  <button class="nav-overlay-close" onclick="document.getElementById('nav-overlay').classList.remove('open')">Close</button>
+  <a href="#schedule" class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Schedule</a>
+  <a href="#travel"   class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Travel</a>
+  <a href="#registry" class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Registry</a>
+  <a href="#qa"       class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Q&amp;A</a>
+  <a href="#rsvp"     class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">RSVP</a>
+  <a href="#share"    class="nav-overlay-link" onclick="document.getElementById('nav-overlay').classList.remove('open')">Photos</a>
+</div>
 
 <!-- HERO -->
 <section id="hero">
