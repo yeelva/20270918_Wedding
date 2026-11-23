@@ -69,6 +69,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      text-decoration: none;
     }
 
     .nav-hanzi {
@@ -77,6 +78,7 @@
       color: #cc4a3c;
       line-height: 1;
       flex-shrink: 0;
+      transition: color 0.3s;
     }
 
     .nav-mark {
@@ -86,7 +88,11 @@
       color: var(--ink);
       white-space: nowrap;
       flex-shrink: 0;
+      transition: color 0.3s;
     }
+
+    .nav-left:hover .nav-mark { color: #c05e3c; }
+    .nav-left:hover .nav-hanzi { color: #b03a2a; }
 
     nav ul { list-style: none; display: flex; gap: 40px; }
 
@@ -977,10 +983,10 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-left">
+  <a href="admin.html" class="nav-left">
     <span class="nav-hanzi">囍</span>
     <div class="nav-mark"><span class="nav-mark-full">Ian & Elva</span><span class="nav-mark-short">I & E</span></div>
-  </div>
+  </a>
   <ul>
     <li><a href="#schedule">Schedule</a></li>
     <li><a href="#travel">Travel</a></li>
